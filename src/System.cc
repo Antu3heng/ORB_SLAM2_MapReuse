@@ -63,6 +63,11 @@ namespace ORB_SLAM2_MapReuse
         //Create the Map
         mpMap = new Map();
 
+        //Create Drawers. These are used by the Viewer
+        mpFrameDrawer = new FrameDrawer(mpMap);
+        mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
+
+        //Create the main process thread(tracker or locator)
         if (mMode != VisualLocalization)
         {
             cout << "Input sensor was set to: ";
@@ -80,11 +85,6 @@ namespace ORB_SLAM2_MapReuse
                 cout << endl << "Localization with ORB-SLAM2 map...." << endl;
             } else
                 cout << endl << "Running ORB-SLAM2 ...." << endl;
-
-
-            //Create Drawers. These are used by the Viewer
-            mpFrameDrawer = new FrameDrawer(mpMap);
-            mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
             //Initialize the Tracking thread
             //(it will live in the main thread of execution, the one that called this constructor)
@@ -315,23 +315,26 @@ namespace ORB_SLAM2_MapReuse
 
     void System::Shutdown()
     {
-        mpLocalMapper->RequestFinish();
-        mpLoopCloser->RequestFinish();
-        if (mpViewer)
+        if (mMode != VisualLocalization)
         {
-            mpViewer->RequestFinish();
-            while (!mpViewer->isFinished())
+            mpLocalMapper->RequestFinish();
+            mpLoopCloser->RequestFinish();
+            if (mpViewer)
+            {
+                mpViewer->RequestFinish();
+                while (!mpViewer->isFinished())
+                    usleep(5000);
+            }
+
+            // Wait until all thread have effectively stopped
+            while (!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
+            {
                 usleep(5000);
-        }
+            }
 
-        // Wait until all thread have effectively stopped
-        while (!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
-        {
-            usleep(5000);
+            if (mpViewer)
+                pangolin::BindToContext("ORB-SLAM2: Map Viewer");
         }
-
-        if (mpViewer)
-            pangolin::BindToContext("ORB-SLAM2: Map Viewer");
     }
 
     void System::SaveTrajectoryTUM(const string &filename)
@@ -565,6 +568,8 @@ namespace ORB_SLAM2_MapReuse
 
     bool System::SaveMap(const string &filename)
     {
+        cout << endl << "Map save to " << filename << endl;
+
         if (!mpMap->SaveMap(filename))
             return false;
 
@@ -574,6 +579,8 @@ namespace ORB_SLAM2_MapReuse
 
     bool System::LoadMap(const string &filename)
     {
+        cout << endl << "Map load from " << filename << endl;
+
         if (!mpMap->LoadMap(filename))
             return false;
 
@@ -600,24 +607,26 @@ namespace ORB_SLAM2_MapReuse
 
     bool System::SaveMapUsingBoost(const std::string &filename)
     {
+        cout << endl << "Map save to " << filename << endl;
+
         std::ofstream os(filename);
 
         boost::archive::binary_oarchive oa(os, boost::archive::no_header);
         oa << mpMap;
 
-        cout << endl << "Map saved successfully to " << filename << endl;
+        cout << endl << "Map has been saved successfully!" << endl;
         return true;
     }
 
     bool System::LoadMapUsingBoost(const std::string &filename)
     {
+        cout << endl << "Map load from " << filename << endl;
+
         std::ifstream is(filename);
 
         Map *temp = mpMap;
         boost::archive::binary_iarchive ia(is, boost::archive::no_header);
         ia >> mpMap;
-
-        cout << endl << "Map loaded from " << filename << endl;
 
         /**
          * @brief TODO
@@ -653,7 +662,7 @@ namespace ORB_SLAM2_MapReuse
         delete temp;
         temp = nullptr;
 
-        cout << "Map loaded successfully." << endl;
+        cout << endl << "Map loaded successfully." << endl;
         return true;
     }
 

@@ -56,8 +56,8 @@ target_link_libraries(orb_slam_node
   ${LIBS}
 )
 
-# add_executable(orb_localization_node src/orb_localization_node.cpp)
-# target_link_libraries(orb_localization_node
-#   ${catkin_LIBRARIES}
-#   ${LIBS}
-# )
+add_executable(orb_localization_node src/orb_localization_node.cpp)
+target_link_libraries(orb_localization_node
+  ${catkin_LIBRARIES}
+  ${LIBS}
+)

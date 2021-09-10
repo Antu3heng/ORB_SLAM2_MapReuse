@@ -52,7 +52,6 @@ namespace ORB_SLAM2_MapReuse
         ORBVocabulary *mpVocabulary;
         KeyFrameDatabase *mpKeyFrameDatabase;
         Map *mpMap;
-        std::string mMapFilePath;
         ORBextractor *mpORBextractor;
         cv::Mat mK;
         cv::Mat mDistCoef;

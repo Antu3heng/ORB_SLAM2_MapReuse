@@ -42,7 +42,7 @@ ThDepth: 35
 # Camera.fx, .fy, etc must be the same as in LEFT.P
 #--------------------------------------------------------------------------------------------
 # Rectification ON/OFF (0: OFF, 1: ON)
-Rectification: 1
+Rectification: 0
 
 LEFT.height: 480
 LEFT.width: 752

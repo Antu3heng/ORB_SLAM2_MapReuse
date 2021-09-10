@@ -10,9 +10,7 @@
  */
 
 #include <iostream>
-#include <algorithm>
 #include <fstream>
-#include <chrono>
 #include <string>
 #include <ros/ros.h>
 #include <message_filters/subscriber.h>
@@ -84,7 +82,7 @@ int main(int argc, char **argv)
         return -1;
     }     
 
-    // Create mapping system. It initializes all system threads and gets ready to process frames.
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM2_MapReuse::System Mapper(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, false);
 
     ImageGrabber igb(&Mapper);
@@ -99,7 +97,7 @@ int main(int argc, char **argv)
     {
         case ORB_SLAM2_MapReuse::System::MONOCULAR:
         {
-            ros::Subscriber img_sub = nh.subscribe(image0Topic, 1, &ImageGrabber::GrabMono, &igb);
+            img_sub = nh.subscribe(image0Topic, 1, &ImageGrabber::GrabMono, &igb);
             break;
         }
         case ORB_SLAM2_MapReuse::System::STEREO:

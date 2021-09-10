@@ -10,9 +10,7 @@
  */
 
 #include <iostream>
-#include <algorithm>
 #include <fstream>
-#include <chrono>
 #include <string>
 #include <ros/ros.h>
 #include <message_filters/subscriber.h>
@@ -88,7 +86,7 @@ int main(int argc, char **argv)
     // Create mapping system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM2_MapReuse::System SLAM(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, true);
     // SLAM.LoadMap(mapSavePath);
-    SLAM.LoadMapUsingBoost(mapSavePath); // using boost load the map
+    // SLAM.LoadMapUsingBoost(mapSavePath); // using boost load the map
 
     ImageGrabber igb(&SLAM);
 
@@ -102,7 +100,7 @@ int main(int argc, char **argv)
     {
         case ORB_SLAM2_MapReuse::System::MONOCULAR:
         {
-            ros::Subscriber img_sub = nh.subscribe(image0Topic, 1, &ImageGrabber::GrabMono, &igb);
+            img_sub = nh.subscribe(image0Topic, 1, &ImageGrabber::GrabMono, &igb);
             break;
         }
         case ORB_SLAM2_MapReuse::System::STEREO:
@@ -158,8 +156,6 @@ int main(int argc, char **argv)
 
     // Save the trajectory
     SLAM.SaveTrajectoryTUM(trajSavePath + "FrameTrajectory.txt");
-
-    ros::shutdown();
 
     return 0;
 }

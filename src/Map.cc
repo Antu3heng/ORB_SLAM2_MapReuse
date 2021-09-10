@@ -150,7 +150,6 @@ std::map<long unsigned int, MapPoint*> Map::GetAllMapPointsUseMap()
 
 bool Map::SaveMap(const string &filename)
 {
-    std::cout << std::endl << "Saving Map to " << filename << std::endl;
     ofstream f;
     f.open(filename.c_str(), ios_base::out|ios_base::binary);
     if(!f.is_open())
@@ -327,7 +326,6 @@ bool Map::SaveMap(const string &filename)
 
 bool Map::LoadMap(const string &filename)
 {
-    std::cout << std::endl << "Loading Map from " << filename << std::endl;
     ifstream f;
     f.open(filename.c_str(), ios_base::in|ios_base::binary);
     if(!f.is_open())
