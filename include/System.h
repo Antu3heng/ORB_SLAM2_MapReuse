@@ -34,6 +34,7 @@
 #include <boost/serialization/vector.hpp>
 
 #include "Tracking.h"
+#include "Locator.h"
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
 #include "Map.h"
@@ -59,6 +60,8 @@ namespace ORB_SLAM2_MapReuse
 
     class LoopClosing;
 
+    class Locator;
+
     class System
     {
         friend class boost::serialization::access;
@@ -72,10 +75,17 @@ namespace ORB_SLAM2_MapReuse
             RGBD = 2
         };
 
+        enum eMode
+        {
+            SLAM = 0,
+            Localization = 1,
+            VisualLocalization = 2
+        };
+
     public:
 
         // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-        System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
+        System(const string &strSettingsFile, const eSensor sensor, const eMode mode,
                const bool bUseViewer = true);
 
         // Proccess the given stereo frame. Images must be synchronized and rectified.
@@ -93,6 +103,9 @@ namespace ORB_SLAM2_MapReuse
         // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
         // Returns the camera pose (empty if tracking fails).
         cv::Mat TrackMonocular(const cv::Mat &im, const double &timestamp);
+
+        // Proccess the visual localization
+        cv::Mat ORBLocalization(const cv::Mat &im, const double &timestamp);
 
         // This stops local mapping thread (map building) and performs only camera tracking.
         void ActivateLocalizationMode();
@@ -152,6 +165,9 @@ namespace ORB_SLAM2_MapReuse
         // Input sensor
         eSensor mSensor;
 
+        // System mode
+        eMode mMode;
+
         // ORB vocabulary used for place recognition and feature matching.
         ORBVocabulary *mpVocabulary;
 
@@ -165,6 +181,9 @@ namespace ORB_SLAM2_MapReuse
         // It also decides when to insert a new keyframe, create some new MapPoints and
         // performs relocalization if tracking fails.
         Tracking *mpTracker;
+
+        // Locator. It receives a frame and computes the associated camera pose using provided map.
+        Locator *mpLocator;
 
         // Local Mapper. It manages the local map and performs local bundle adjustment.
         LocalMapping *mpLocalMapper;

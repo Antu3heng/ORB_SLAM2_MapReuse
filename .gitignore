@@ -8,4 +8,5 @@ logs
 .catkin_tools
 example/ROS/src/vision_opencv
 .idea
+.vscode
 Vocabulary/ORBvoc.txt

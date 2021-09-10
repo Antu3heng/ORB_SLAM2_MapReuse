@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     }     
 
     // Create mapping system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2_MapReuse::System Mapper(vocPath, argv[1], cameraType, false);
+    ORB_SLAM2_MapReuse::System Mapper(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, false);
 
     ImageGrabber igb(&Mapper);
 
