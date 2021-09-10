@@ -19,8 +19,8 @@ using namespace std;
 namespace ORB_SLAM2_MapReuse
 {
 
-    Locator::Locator(ORBVocabulary *pVoc, Map *pMap, KeyFrameDatabase *pKFDB, const string &strSettingsFile)
-            : mpVocabulary(pVoc), mpMap(pMap), mpKeyFrameDatabase(pKFDB)
+    Locator::Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile)
+            : mpVocabulary(pVoc), mpKeyFrameDatabase(pKFDB)
     {
         cv::FileStorage fsSettings(strSettingsFile, cv::FileStorage::READ);
         float fx = fsSettings["Camera.fx"];
@@ -261,11 +261,6 @@ namespace ORB_SLAM2_MapReuse
             return false;
         else
             return true;
-    }
-
-    void Locator::SetMap(Map *pMap)
-    {
-        mpMap = pMap;
     }
 
     float Locator::CalculateRecall()

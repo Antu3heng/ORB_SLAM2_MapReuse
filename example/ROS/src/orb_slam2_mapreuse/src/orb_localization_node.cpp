@@ -31,6 +31,8 @@ public:
     void GrabImage(const sensor_msgs::ImageConstPtr &msg);
 
     ORB_SLAM2_MapReuse::System *mpLocalization;
+    bool do_rectify;
+    cv::Mat M1l, M2l, M1r, M2r;
 };
 
 int main(int argc, char **argv)
@@ -76,10 +78,46 @@ int main(int argc, char **argv)
 
     // Create Localization system. 
     ORB_SLAM2_MapReuse::System Localization(argv[1], cameraType, ORB_SLAM2_MapReuse::System::VisualLocalization);
-    // Localization.LoadMap(mapSavePath);
-    Localization.LoadMapUsingBoost(mapSavePath); // using boost load the map
+    Localization.LoadMap(mapSavePath);
+    // Localization.LoadMapUsingBoost(mapSavePath); // using boost load the map
 
     ImageGrabber igb(&Localization);
+
+    if (cameraType == ORB_SLAM2_MapReuse::System::STEREO)
+    {
+        fsSettings["Rectification"] >> igb.do_rectify;
+        if (igb.do_rectify)
+        {
+            // Load settings related to stereo calibration
+            cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r;
+            fsSettings["LEFT.K"] >> K_l;
+            fsSettings["RIGHT.K"] >> K_r;
+
+            fsSettings["LEFT.P"] >> P_l;
+            fsSettings["RIGHT.P"] >> P_r;
+
+            fsSettings["LEFT.R"] >> R_l;
+            fsSettings["RIGHT.R"] >> R_r;
+
+            fsSettings["LEFT.D"] >> D_l;
+            fsSettings["RIGHT.D"] >> D_r;
+
+            int rows_l = fsSettings["LEFT.height"];
+            int cols_l = fsSettings["LEFT.width"];
+            int rows_r = fsSettings["RIGHT.height"];
+            int cols_r = fsSettings["RIGHT.width"];
+
+            if (K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty() || D_l.empty() || D_r.empty() ||
+                rows_l == 0 || rows_r == 0 || cols_l == 0 || cols_r == 0)
+            {
+                cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << endl;
+                return -1;
+            }
+
+            cv::initUndistortRectifyMap(K_l, D_l, R_l, P_l.rowRange(0, 3).colRange(0, 3), cv::Size(cols_l, rows_l), CV_32F, igb.M1l, igb.M2l);
+            cv::initUndistortRectifyMap(K_r, D_r, R_r, P_r.rowRange(0, 3).colRange(0, 3), cv::Size(cols_r, rows_r), CV_32F, igb.M1r, igb.M2r);
+        }
+    }
 
     ros::Subscriber img_sub = nh.subscribe(image0Topic, 10, &ImageGrabber::GrabImage, &igb);
     pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/mapLoc/pose", 10);
@@ -109,7 +147,16 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
 
-    cv::Mat Tcw = mpLocalization->ORBLocalization(cv_ptr->image, cv_ptr->header.stamp.toSec());
+    cv::Mat Tcw;
+
+    if (do_rectify)
+    {
+        cv::Mat imLeft;
+        cv::remap(cv_ptr->image, imLeft, M1l, M2l, cv::INTER_LINEAR);
+        Tcw = mpLocalization->ORBLocalization(imLeft, cv_ptr->header.stamp.toSec());
+    }
+    else
+        Tcw = mpLocalization->ORBLocalization(cv_ptr->image, cv_ptr->header.stamp.toSec());
 
     if(!cv::countNonZero(Tcw) < 1)
     {

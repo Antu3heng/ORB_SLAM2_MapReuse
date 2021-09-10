@@ -18,7 +18,6 @@
 #include "ORBVocabulary.h"
 #include "KeyFrameDatabase.h"
 #include "ORBextractor.h"
-#include "Map.h"
 #include "ORBmatcher.h"
 #include "Converter.h"
 #include <list>
@@ -26,18 +25,14 @@
 namespace ORB_SLAM2_MapReuse
 {
 
-    class Map;
-
     class Locator
     {
 
     public:
 
-        Locator(ORBVocabulary *pVoc, Map *pMap, KeyFrameDatabase *pKFDB, const string &strSettingsFile);
+        Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile);
 
         cv::Mat visualLocalization(const cv::Mat &im, const double &timestamp);
-
-        void SetMap(Map *pMap);
 
         float CalculateRecall();
 
@@ -51,7 +46,6 @@ namespace ORB_SLAM2_MapReuse
 
         ORBVocabulary *mpVocabulary;
         KeyFrameDatabase *mpKeyFrameDatabase;
-        Map *mpMap;
         ORBextractor *mpORBextractor;
         cv::Mat mK;
         cv::Mat mDistCoef;

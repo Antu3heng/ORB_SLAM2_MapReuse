@@ -63,10 +63,6 @@ namespace ORB_SLAM2_MapReuse
         //Create the Map
         mpMap = new Map();
 
-        //Create Drawers. These are used by the Viewer
-        mpFrameDrawer = new FrameDrawer(mpMap);
-        mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
-
         //Create the main process thread(tracker or locator)
         if (mMode != VisualLocalization)
         {
@@ -85,6 +81,10 @@ namespace ORB_SLAM2_MapReuse
                 cout << endl << "Localization with ORB-SLAM2 map...." << endl;
             } else
                 cout << endl << "Running ORB-SLAM2 ...." << endl;
+
+            //Create Drawers. These are used by the Viewer
+            mpFrameDrawer = new FrameDrawer(mpMap);
+            mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
             //Initialize the Tracking thread
             //(it will live in the main thread of execution, the one that called this constructor)
@@ -119,7 +119,7 @@ namespace ORB_SLAM2_MapReuse
         } else
         {
             cout << endl << "Visual Localization with ORB-SLAM2 map...." << endl;
-            mpLocator = new Locator(mpVocabulary, mpMap, mpKeyFrameDatabase, strSettingsFile);
+            mpLocator = new Locator(mpVocabulary, mpKeyFrameDatabase, strSettingsFile);
         }
 
     }
@@ -656,8 +656,7 @@ namespace ORB_SLAM2_MapReuse
             mpTracker->SetMap(mpMap);
             mpLocalMapper->SetMap(mpMap);
             mpLoopCloser->SetMap(mpMap);
-        } else
-            mpLocator->SetMap(mpMap);
+        }
 
         delete temp;
         temp = nullptr;

@@ -152,8 +152,8 @@ int main(int argc, char **argv)
     Mapper.Shutdown();
 
     // Save the map
-    // Mapper.SaveMap(mapSavePath);
-    Mapper.SaveMapUsingBoost(mapSavePath); // using boost save the map
+    Mapper.SaveMap(mapSavePath);
+    // Mapper.SaveMapUsingBoost(mapSavePath); // using boost save the map
 
     return 0;
 }
