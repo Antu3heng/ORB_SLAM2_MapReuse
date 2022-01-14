@@ -39,6 +39,8 @@ namespace ORB_SLAM2_MapReuse
         list<cv::Mat> mlFramePoses;
         list<double> mlFrameTimes;
         list<bool> mlbFrameLocated;
+        list<std::vector<double> > mlCandidateKFTimes;
+        list<double> mlRelocKFTimes;
 
     private:
 

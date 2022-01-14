@@ -43,7 +43,7 @@ class KeyFrame;
 class Frame
 {
 public:
-    Frame();
+    Frame() = default;
 
     // Copy constructor.
     Frame(const Frame &frame);
@@ -100,13 +100,13 @@ public:
 
 public:
     // Vocabulary used for relocalization.
-    ORBVocabulary* mpORBvocabulary;
+    ORBVocabulary* mpORBvocabulary{};
 
     // Feature extractor. The right is used only in the stereo case.
-    ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
+    ORBextractor* mpORBextractorLeft{}, *mpORBextractorRight{};
 
     // Frame timestamp.
-    double mTimeStamp;
+    double mTimeStamp{};
 
     // Calibration matrix and OpenCV distortion parameters.
     cv::Mat mK;
@@ -119,17 +119,17 @@ public:
     cv::Mat mDistCoef;
 
     // Stereo baseline multiplied by fx.
-    float mbf;
+    float mbf{};
 
     // Stereo baseline in meters.
-    float mb;
+    float mb{};
 
     // Threshold close/far points. Close points are inserted from 1 view.
     // Far points are inserted as in the monocular case from 2 views.
-    float mThDepth;
+    float mThDepth{};
 
     // Number of KeyPoints.
-    int N;
+    int N{};
 
     // Vector of keypoints (original for visualization) and undistorted (actually used by the system).
     // In the stereo case, mvKeysUn is redundant as images must be rectified.
@@ -165,15 +165,15 @@ public:
 
     // Current and Next Frame id.
     static long unsigned int nNextId;
-    long unsigned int mnId;
+    long unsigned int mnId{};
 
     // Reference Keyframe.
-    KeyFrame* mpReferenceKF;
+    KeyFrame* mpReferenceKF{};
 
     // Scale pyramid info.
-    int mnScaleLevels;
-    float mfScaleFactor;
-    float mfLogScaleFactor;
+    int mnScaleLevels{};
+    float mfScaleFactor{};
+    float mfLogScaleFactor{};
     vector<float> mvScaleFactors;
     vector<float> mvInvScaleFactors;
     vector<float> mvLevelSigma2;

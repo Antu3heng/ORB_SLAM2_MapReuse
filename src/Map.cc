@@ -117,11 +117,11 @@ long unsigned int Map::GetMaxKFid()
 
 void Map::clear()
 {
-    for(auto sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
-        delete *sit;
+    for(auto mspMapPoint : mspMapPoints)
+        delete mspMapPoint;
 
-    for(auto sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
-        delete *sit;
+    for(auto mspKeyFrame : mspKeyFrames)
+        delete mspKeyFrame;
 
     mspMapPoints.clear();
     mspKeyFrames.clear();
@@ -242,7 +242,7 @@ bool Map::SaveMap(const string &filename)
 
             // Save the idx and ID of MapPoint observed
             long unsigned int mpId;
-            if(vpMapPoints[i] == NULL)
+            if(vpMapPoints[i] == nullptr)
                 mpId = ULONG_MAX;
             else
                 mpId = vpMapPoints[i]->mnId;
@@ -312,7 +312,7 @@ bool Map::SaveMap(const string &filename)
         // Save the ID of parent
         KeyFrame *kfp = kf->GetParent();
         long unsigned int kfpId;
-        if(kfp == NULL)
+        if(kfp == nullptr)
             kfpId = ULONG_MAX;
         else
             kfpId = kfp->mnId;
@@ -366,7 +366,7 @@ bool Map::LoadMap(const string &filename)
         f.read((char*)&fMinDistance, sizeof(float));
         f.read((char*)&fMaxDistance, sizeof(float));
         // Create the MapPoint and add it to Map
-        MapPoint *mp = new MapPoint(Position, this, mp_descriptor, fMinDistance, fMaxDistance);
+        auto *mp = new MapPoint(Position, this, mp_descriptor, fMinDistance, fMaxDistance);
         mp->mnId = id;
         AddMapPoint(mp);
     }
@@ -423,7 +423,7 @@ bool Map::LoadMap(const string &filename)
             long unsigned int mpId;
             f.read((char*)&mpId, sizeof(long unsigned int));
             if(mpId == ULONG_MAX)
-                vpMapPoints[i] = static_cast<MapPoint*>(NULL);
+                vpMapPoints[i] = static_cast<MapPoint*>(nullptr);
             else
                 vpMapPoints[i] = mpMapPointsInMap[mpId];
         }
@@ -506,7 +506,7 @@ bool Map::LoadMap(const string &filename)
         // TODO: save and load the vuRight and vDepth
         std::vector<float> vuRight = vector<float>(N,-1);
         std::vector<float> vDepth = vector<float>(N,-1);
-        KeyFrame *kf = new KeyFrame(vpMapPoints, vKeys, vKeysUn, N, Descriptors, nMinX, nMinY, nMaxX, nMaxY, nGridCols,
+        auto *kf = new KeyFrame(vpMapPoints, vKeys, vKeysUn, N, Descriptors, nMinX, nMinY, nMaxX, nMaxY, nGridCols,
                                     nGridRows, this, fGridElementWidthInv, fGridElementHeightInv, Grid, vuRight, vDepth, nScaleLevels, fScaleFactor,
                                     fLogScaleFactor, vScaleFactors, vLevelSigma2, vInvLevelSigma2);
         kf->mnId = id;

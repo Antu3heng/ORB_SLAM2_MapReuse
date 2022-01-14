@@ -143,6 +143,10 @@ namespace ORB_SLAM2_MapReuse
         // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
         void SaveTrajectoryKITTI(const string &filename);
 
+        void SaveRelocCandidateKF(const string &filename);
+
+        void SaveRelocKF(const string &filename);
+
         // Save/Load functions
         bool SaveMap(const string &filename);
 

@@ -427,11 +427,10 @@ namespace ORB_SLAM2_MapReuse
     {
         if (mMode != SLAM)
         {
-            cout << endl << "(Visual) Localization Mode cannot save keyframe trajectory!" << endl;
-            return;
+            cout << endl << "Saving keyframe pose to " << filename << " ..." << endl;
         }
-
-        cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
+        else
+            cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
 
         vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
         sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
@@ -548,6 +547,52 @@ namespace ORB_SLAM2_MapReuse
         cout << endl << "KITTI format trajectory saved!" << endl;
     }
 
+    void System::SaveRelocCandidateKF(const string &filename)
+    {
+        cout << endl << "Saving relocalization correspondence to " << filename << " ..." << endl;
+
+        ofstream f;
+        f.open(filename.c_str());
+        f << fixed;
+
+        f << "Query image timestamp    Candidate keyframe timestamp" << endl;
+
+        auto itlCandKF = mpLocator->mlCandidateKFTimes.begin();
+        for (auto lit = mpLocator->mlFrameTimes.begin(), lend = mpLocator->mlFrameTimes.end();
+             lit != lend; ++lit, ++itlCandKF)
+        {
+            f << setprecision(9) << *lit;
+            std::vector<double> vCandKFTime = *itlCandKF;
+            for (auto &CKF: vCandKFTime)
+                f << " " << setprecision(9) << CKF;
+            f << endl;
+        }
+
+        f.close();
+        cout << endl << "localization correspondence saved!" << endl;
+    }
+
+    void System::SaveRelocKF(const string &filename)
+    {
+        cout << endl << "Saving relocalization keyframe used to " << filename << " ..." << endl;
+
+        ofstream f;
+        f.open(filename.c_str());
+        f << fixed;
+
+        f << "Query image timestamp    Keyframe used to relocate timestamp" << endl;
+
+        auto itlRelocKF = mpLocator->mlRelocKFTimes.begin();
+        for (auto lit = mpLocator->mlFrameTimes.begin(), lend = mpLocator->mlFrameTimes.end();
+             lit != lend; ++lit, ++itlRelocKF)
+        {
+            f << setprecision(9) << *lit << " " << *itlRelocKF << endl;
+        }
+
+        f.close();
+        cout << endl << "localization keyframe saved!" << endl;
+    }
+
     int System::GetTrackingState()
     {
         unique_lock<mutex> lock(mMutexState);
@@ -634,19 +679,19 @@ namespace ORB_SLAM2_MapReuse
          * 2. SLAM Mode too many KeyFrames
          */
         std::vector<KeyFrame *> vpKeyFrames = mpMap->GetAllKeyFrames();
-        for (auto it = vpKeyFrames.begin(); it != vpKeyFrames.end(); it++)
+        for (auto &vpKeyFrame: vpKeyFrames)
         {
-            (*it)->SetKeyFrameDatabase(mpKeyFrameDatabase);
-            (*it)->SetORBVocabulary(mpVocabulary);
-            (*it)->SetMap(mpMap);
-            mpKeyFrameDatabase->add(*it);
-            (*it)->UpdateConnections();
+            vpKeyFrame->SetKeyFrameDatabase(mpKeyFrameDatabase);
+            vpKeyFrame->SetORBVocabulary(mpVocabulary);
+            vpKeyFrame->SetMap(mpMap);
+            mpKeyFrameDatabase->add(vpKeyFrame);
+            vpKeyFrame->UpdateConnections();
         }
 
         std::vector<MapPoint *> vpMapPoints = mpMap->GetAllMapPoints();
-        for (auto it = vpMapPoints.begin(); it != vpMapPoints.end(); it++)
+        for (auto &vpMapPoint: vpMapPoints)
         {
-            (*it)->SetMap(mpMap);
+            vpMapPoint->SetMap(mpMap);
         }
 
         if (mMode != VisualLocalization)

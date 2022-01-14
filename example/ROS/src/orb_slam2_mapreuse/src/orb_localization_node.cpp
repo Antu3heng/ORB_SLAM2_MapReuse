@@ -26,7 +26,7 @@ ros::Publisher pose_pub;
 class ImageGrabber
 {
 public:
-    ImageGrabber(ORB_SLAM2_MapReuse::System *pLocalization) : mpLocalization(pLocalization) {}
+    ImageGrabber(ORB_SLAM2_MapReuse::System *pLocalization) : mpLocalization(pLocalization), do_rectify(false) {}
 
     void GrabImage(const sensor_msgs::ImageConstPtr &msg);
 

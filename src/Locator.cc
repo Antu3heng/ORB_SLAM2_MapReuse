@@ -127,8 +127,16 @@ namespace ORB_SLAM2_MapReuse
         mCurrentFrame.ComputeBoW();
         vector<KeyFrame *> vpCandidateKFs = mpKeyFrameDatabase->DetectRelocalizationCandidates(&mCurrentFrame);
 
+        vector<double> CandidateKFTimes;
+        for(auto &CKF:vpCandidateKFs)
+            CandidateKFTimes.push_back(CKF->mTimeStamp);
+        mlCandidateKFTimes.push_back(CandidateKFTimes);
+
         if (vpCandidateKFs.empty())
+        {
+            mlRelocKFTimes.push_back(double(0));
             return false;
+        }
 
         const int nKFs = vpCandidateKFs.size();
 
@@ -205,7 +213,7 @@ namespace ORB_SLAM2_MapReuse
                             mCurrentFrame.mvpMapPoints[j] = vvpMapPointMatches[i][j];
                             sFound.insert(vvpMapPointMatches[i][j]);
                         } else
-                            mCurrentFrame.mvpMapPoints[j] = NULL;
+                            mCurrentFrame.mvpMapPoints[j] = nullptr;
                     }
 
                     int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
@@ -250,6 +258,7 @@ namespace ORB_SLAM2_MapReuse
 
                     if (nGood >= 50)
                     {
+                        mlRelocKFTimes.push_back(vpCandidateKFs[i]->mTimeStamp);
                         bMatch = true;
                         break;
                     }
@@ -258,7 +267,10 @@ namespace ORB_SLAM2_MapReuse
         }
 
         if (!bMatch)
+        {
+            mlRelocKFTimes.push_back(double(0));
             return false;
+        }
         else
             return true;
     }
