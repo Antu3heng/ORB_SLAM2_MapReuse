@@ -12,18 +12,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=native")
 
 # Check C++11 or C++0x support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-   add_definitions(-DCOMPILEDWITHC11)
-   message(STATUS "Using flag -std=c++11.")
-elseif(COMPILER_SUPPORTS_CXX0X)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-   add_definitions(-DCOMPILEDWITHC0X)
-   message(STATUS "Using flag -std=c++0x.")
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+if(COMPILER_SUPPORTS_CXX14)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+   add_definitions(-DCOMPILEDWITHC14)
+   message(STATUS "Using flag -std=c++14.")
 else()
-   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
 endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
@@ -82,7 +77,7 @@ src/Viewer.cc
 src/ORBrefiner.cc
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PUBLIC
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
@@ -91,34 +86,21 @@ ${TORCH_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 )
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
 # Build examples
 
-set(LIBS
-${PROJECT_NAME}
-${OpenCV_LIBS}
-${EIGEN3_LIBS}
-${Pangolin_LIBRARIES}
-${Boost_LIBRARIES}
-${TORCH_LIBRARIES}
-${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
-)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/example/CPP)
 
 add_executable(orb_slam_mono example/CPP/orb_slam_mono.cc)
 target_link_libraries(orb_slam_mono ${PROJECT_NAME})
-set_property(TARGET orb_slam_mono PROPERTY CXX_STANDARD 14)
-#
-# add_executable(orb_mapping_mono example/CPP/orb_mapping_mono.cc)
-# target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
-#
-# add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
-# target_link_libraries(orb_localization_mono ${PROJECT_NAME})
-#
+
+add_executable(orb_mapping_mono example/CPP/orb_mapping_mono.cc)
+target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
+
+add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
+target_link_libraries(orb_localization_mono ${PROJECT_NAME})
+
 add_executable(test_libtorch example/CPP/test_libtorch.cpp src/ORBrefiner.cc)
 target_link_libraries(test_libtorch ${TORCH_LIBRARIES} ${OpenCV_LIBS})
-set_property(TARGET test_libtorch PROPERTY CXX_STANDARD 14)
 

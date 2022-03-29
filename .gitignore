@@ -14,4 +14,5 @@ orb_slam_mono
 orb_mapping_mono
 orb_localization_mono
 result
-libtorch
+libtorch*
+test_libtorch

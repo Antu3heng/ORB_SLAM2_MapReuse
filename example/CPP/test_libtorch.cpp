@@ -10,18 +10,16 @@
 
 int main()
 {
-    torch::Tensor tensor = torch::rand({2000, 256});
+    cv::Mat descriptors(2000, 32, CV_8UC1);
     auto model = std::make_shared<ORBrefiner>(256, 256, Binary);
     model->eval();
-    // ORBrefiner refiner(256, 256, Binary);
-    // refiner.eval();
     torch::load(model, "/home/antusheng/Desktop/orb_refine_binary.pt");
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-    auto result = model->forward(tensor);
+    model->refine(descriptors);
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     double time = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
 
-    std::cout << result << std::endl;
+    std::cout << descriptors << std::endl;
 
     std::cout << "Refine time: " << time << std::endl;
 

@@ -33,6 +33,7 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${Pangolin_INCLUDE_DIRS}
+  ${TORCH_INCLUDE_DIRS}
   "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse"
   "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/include"
 )
@@ -42,6 +43,7 @@ ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Boost_LIBRARIES}
 ${Pangolin_LIBRARIES}
+${TORCH_LIBRARIES}
 /home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/DBoW2/lib/libDBoW2.so
 /home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/g2o/lib/libg2o.so
 /home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/lib/libORB_SLAM2_MapReuse.so

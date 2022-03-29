@@ -158,7 +158,7 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
     else
         Tcw = mpLocalization->ORBLocalization(cv_ptr->image, cv_ptr->header.stamp.toSec());
 
-    if(!cv::countNonZero(Tcw) < 1)
+    if(cv::countNonZero(Tcw))
     {
         cv::Mat Rwc = Tcw.rowRange(0, 3).colRange(0, 3).t();
         cv::Mat twc = -Rwc * Tcw.rowRange(0, 3).col(3);
@@ -178,5 +178,5 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
 
         // cout << fixed;
         // cout << setprecision(6) << cv_ptr->header.stamp << " " <<  setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
-    }   
+    }
 }

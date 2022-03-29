@@ -126,6 +126,7 @@ namespace ORB_SLAM2_MapReuse
 
         int nORBrefiner = fSettings["ORBrefiner.Used"];
         mbRefineORB = nORBrefiner;
+        if (mbRefineORB) cout << "Use ORB refine!!!" << endl;
 
         mpORBrefiner = make_shared<ORBrefiner>(256, 256, Binary);
         mpORBrefiner->eval();
