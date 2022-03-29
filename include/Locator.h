@@ -18,6 +18,7 @@
 #include "ORBVocabulary.h"
 #include "KeyFrameDatabase.h"
 #include "ORBextractor.h"
+#include "ORBrefiner.h"
 #include "ORBmatcher.h"
 #include "Converter.h"
 #include <list>
@@ -49,10 +50,12 @@ namespace ORB_SLAM2_MapReuse
         ORBVocabulary *mpVocabulary;
         KeyFrameDatabase *mpKeyFrameDatabase;
         ORBextractor *mpORBextractor;
+        shared_ptr<ORBrefiner> mpORBrefiner;
         cv::Mat mK;
         cv::Mat mDistCoef;
         float mbf;
         bool mbRGB;
+        bool mbRefineORB;
 
         Frame mCurrentFrame;
     };

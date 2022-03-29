@@ -110,6 +110,9 @@ ORBextractor.nLevels: 8
 ORBextractor.iniThFAST: 20
 ORBextractor.minThFAST: 7
 
+ORBrefiner.Used: 0
+ORBrefiner.Path: "/home/antusheng/Desktop/orb_refine_binary.pt"
+
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
 #--------------------------------------------------------------------------------------------

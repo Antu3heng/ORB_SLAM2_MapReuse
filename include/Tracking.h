@@ -37,6 +37,7 @@
 #include "Initializer.h"
 #include "MapDrawer.h"
 #include "System.h"
+#include "ORBrefiner.h"
 
 #include <mutex>
 
@@ -158,6 +159,8 @@ protected:
     //ORB
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
     ORBextractor* mpIniORBextractor;
+    bool mbRefineORB;
+    shared_ptr<ORBrefiner> mpORBrefiner;
 
     //BoW
     ORBVocabulary* mpORBVocabulary;

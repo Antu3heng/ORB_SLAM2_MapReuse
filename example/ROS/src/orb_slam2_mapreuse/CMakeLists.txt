@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3")
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
@@ -21,6 +21,9 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
 find_package(Pangolin REQUIRED)
+
+find_package(Torch REQUIRED PATHS /home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/libtorch/share/cmake/Torch NO_DEFAULT_PATH)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 catkin_package()
 

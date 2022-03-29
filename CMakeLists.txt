@@ -44,12 +44,16 @@ if(NOT Boost_FOUND)
    message("Boost not found.")
 endif()
 
+find_package(Torch REQUIRED PATHS ${PROJECT_SOURCE_DIR}/Thirdparty/libtorch/share/cmake/Torch NO_DEFAULT_PATH)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
 ${Boost_INCLUDE_DIRS}
+${TORCH_INCLUDE_DIRS}
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -75,6 +79,7 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
+src/ORBrefiner.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -82,20 +87,38 @@ ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Boost_LIBRARIES}
+${TORCH_LIBRARIES}
+${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+
+# Build examples
+
+set(LIBS
+${PROJECT_NAME}
+${OpenCV_LIBS}
+${EIGEN3_LIBS}
+${Pangolin_LIBRARIES}
+${Boost_LIBRARIES}
+${TORCH_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 )
 
-# Build examples
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/example/CPP)
 
- set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/example/CPP)
-
- add_executable(orb_slam_mono example/CPP/orb_slam_mono.cc)
- target_link_libraries(orb_slam_mono ${PROJECT_NAME})
-
- add_executable(orb_mapping_mono example/CPP/orb_mapping_mono.cc)
- target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
-
- add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
- target_link_libraries(orb_localization_mono ${PROJECT_NAME})
+add_executable(orb_slam_mono example/CPP/orb_slam_mono.cc)
+target_link_libraries(orb_slam_mono ${PROJECT_NAME})
+set_property(TARGET orb_slam_mono PROPERTY CXX_STANDARD 14)
+#
+# add_executable(orb_mapping_mono example/CPP/orb_mapping_mono.cc)
+# target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
+#
+# add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
+# target_link_libraries(orb_localization_mono ${PROJECT_NAME})
+#
+add_executable(test_libtorch example/CPP/test_libtorch.cpp src/ORBrefiner.cc)
+target_link_libraries(test_libtorch ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+set_property(TARGET test_libtorch PROPERTY CXX_STANDARD 14)
 

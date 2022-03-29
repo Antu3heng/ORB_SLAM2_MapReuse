@@ -62,7 +62,8 @@ namespace ORB_SLAM2_MapReuse
         cout << "- p1: " << DistCoef.at<float>(2) << endl;
         cout << "- p2: " << DistCoef.at<float>(3) << endl;
 
-        fsSettings["Camera.RGB"] >> mbRGB;
+        int nRGB = fsSettings["Camera.RGB"];
+        mbRGB = nRGB;
 
         if (mbRGB)
             cout << "- color order: RGB (ignored if grayscale)" << endl;
@@ -78,6 +79,15 @@ namespace ORB_SLAM2_MapReuse
         int fMinThFAST = fsSettings["ORBextractor.minThFAST"];
 
         mpORBextractor = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+
+        int nORBrefiner = fsSettings["ORBrefiner.Used"];
+        mbRefineORB = nORBrefiner;
+
+        mpORBrefiner = make_shared<ORBrefiner>(256, 256, Binary);
+        mpORBrefiner->eval();
+        string refinerModelPath;
+        fsSettings["ORBrefiner.Path"] >> refinerModelPath;
+        torch::load(mpORBrefiner, refinerModelPath);
 
         cout << endl << "ORB Extractor Parameters: " << endl;
         cout << "- Number of Features: " << nFeatures << endl;
@@ -104,7 +114,7 @@ namespace ORB_SLAM2_MapReuse
             else
                 cvtColor(ImGray, ImGray, CV_BGRA2GRAY);
         }
-        mCurrentFrame = Frame(ImGray, timestamp, mpORBextractor, mpVocabulary, mK, mDistCoef, mbf, 0.0f);
+        mCurrentFrame = Frame(ImGray, timestamp, mpORBextractor, mpVocabulary, mK, mDistCoef, mbf, 0.0f, mpORBrefiner, mbRefineORB);
 
         if (VisualLocalization())
         {
