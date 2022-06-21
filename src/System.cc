@@ -23,7 +23,7 @@
 #include "System.h"
 #include "Converter.h"
 #include <thread>
-#include <pangolin/pangolin.h>
+#include "Thirdparty/Pangolin-0.6/include/pangolin/pangolin.h"
 #include <iomanip>
 
 namespace ORB_SLAM2_MapReuse

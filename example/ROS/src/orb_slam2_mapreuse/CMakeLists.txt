@@ -3,8 +3,8 @@ project(orb_slam2_mapreuse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3  -Wl,--copy-dt-needed-entries")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3  -Wl,--copy-dt-needed-entries")
 
 add_compile_options(-std=c++11)
 
@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
-find_package(Pangolin REQUIRED)
+# find_package(Pangolin REQUIRED)
 
 catkin_package()
 
@@ -29,19 +29,15 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${Pangolin_INCLUDE_DIRS}
-  "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse"
-  "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/include"
+  /home/drone/wxj/test/ORB_SLAM2_MapReuse
+  /home/drone/wxj/test/ORB_SLAM2_MapReuse/include
 )
 
 set(LIBS 
 ${OpenCV_LIBS} 
 ${EIGEN3_LIBS}
 ${Boost_LIBRARIES}
-${Pangolin_LIBRARIES}
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/DBoW2/lib/libDBoW2.so
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/g2o/lib/libg2o.so
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/lib/libORB_SLAM2_MapReuse.so
+/home/drone/wxj/test/ORB_SLAM2_MapReuse/lib/libORB_SLAM2_MapReuse.so
 )
 
 add_executable(orb_mapping_node src/orb_mapping_node.cpp)
