@@ -594,6 +594,7 @@ namespace ORB_SLAM2_MapReuse
 
             // Find correspondences
             ORBmatcher matcher(0.9, true);
+            // ORBmatcher matcher(1.0, false);
             int nmatches = matcher.SearchForInitialization(mInitialFrame, mCurrentFrame, mvbPrevMatched, mvIniMatches,
                                                            100);
 
@@ -760,6 +761,7 @@ namespace ORB_SLAM2_MapReuse
         // We perform first an ORB matching with the reference keyframe
         // If enough matches are found we setup a PnP solver
         ORBmatcher matcher(0.7, true);
+        // ORBmatcher matcher(1.0, false);
         vector<MapPoint *> vpMapPointMatches;
 
         int nmatches = matcher.SearchByBoW(mpReferenceKF, mCurrentFrame, vpMapPointMatches);
@@ -859,6 +861,7 @@ namespace ORB_SLAM2_MapReuse
     bool Tracking::TrackWithMotionModel()
     {
         ORBmatcher matcher(0.9, true);
+        // ORBmatcher matcher(1.0, false);
 
         // Update last frame pose according to its reference keyframe
         // Create "visual odometry" points if in Localization Mode
@@ -1168,6 +1171,7 @@ namespace ORB_SLAM2_MapReuse
         if (nToMatch > 0)
         {
             ORBmatcher matcher(0.8);
+            // ORBmatcher matcher(1.0, false);
             int th = 1;
             if (mSensor == System::RGBD)
                 th = 3;
@@ -1346,6 +1350,7 @@ namespace ORB_SLAM2_MapReuse
         // We perform first an ORB matching with each candidate
         // If enough matches are found we setup a PnP solver
         ORBmatcher matcher(0.75, true);
+        // ORBmatcher matcher(0.75, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -1384,6 +1389,7 @@ namespace ORB_SLAM2_MapReuse
         // Until we found a camera pose supported by enough inliers
         bool bMatch = false;
         ORBmatcher matcher2(0.9, true);
+        // ORBmatcher matcher2(1.0, false);
 
         while (nCandidates > 0 && !bMatch)
         {

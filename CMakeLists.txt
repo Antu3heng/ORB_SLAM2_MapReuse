@@ -101,6 +101,15 @@ target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
 add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
 target_link_libraries(orb_localization_mono ${PROJECT_NAME})
 
+add_executable(stereo_euroc example/CPP/stereo_euroc.cpp)
+target_link_libraries(stereo_euroc ${PROJECT_NAME})
+
+add_executable(stereo_euroc_localization example/CPP/stereo_euroc_localization.cpp)
+target_link_libraries(stereo_euroc_localization ${PROJECT_NAME})
+
+add_executable(stereo_kitti example/CPP/stereo_kitti.cc)
+target_link_libraries(stereo_kitti ${PROJECT_NAME})
+
 add_executable(test_libtorch example/CPP/test_libtorch.cpp src/ORBrefiner.cc)
 target_link_libraries(test_libtorch ${TORCH_LIBRARIES} ${OpenCV_LIBS})
 

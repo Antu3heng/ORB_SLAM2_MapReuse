@@ -200,6 +200,8 @@ cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInli
         }
     }
 
+    // cout << "Best Inliers: " << mnBestInliers << endl;
+
     if(mnIterations>=mRansacMaxIts)
         bNoMore=true;
 

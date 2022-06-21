@@ -151,6 +151,7 @@ namespace ORB_SLAM2_MapReuse
         const int nKFs = vpCandidateKFs.size();
 
         ORBmatcher matcher(0.75, true);
+        // ORBmatcher matcher(0.75, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -187,6 +188,7 @@ namespace ORB_SLAM2_MapReuse
 
         bool bMatch = false;
         ORBmatcher matcher2(0.9, true);
+        // ORBmatcher matcher2(0.9, false);
 
         while (nCandidates > 0 && !bMatch)
         {

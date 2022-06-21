@@ -37,6 +37,7 @@ torch::Tensor ORBrefiner::forward(torch::Tensor x)
 
 void ORBrefiner::refine(cv::Mat &descriptors)
 {
+    torch::TensorOptions grad_false(torch::requires_grad(false));
     // std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     cv::Mat tmps(descriptors.rows, descriptors.cols * 8, CV_8UC1);
     for (int i = 0; i < descriptors.rows; i++)

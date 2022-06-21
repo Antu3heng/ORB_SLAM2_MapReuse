@@ -52,7 +52,7 @@ public:
    * @param weighting weighting type
    * @param scoring scoring type
    */
-  TemplatedVocabulary(int k = 10, int L = 5, 
+  TemplatedVocabulary(int k = 10, int L = 5,
     WeightingType weighting = TF_IDF, ScoringType scoring = L1_NORM);
   
   /**
@@ -682,8 +682,8 @@ void TemplatedVocabulary<TDescriptor,F>::HKmeansStep(NodeId parent_id,
     {
       // 1. Calculate clusters
 
-			if(first_time)
-			{
+      if(first_time)
+      {
         // random sample 
         initiateClusters(descriptors, clusters);
       }
@@ -771,14 +771,14 @@ void TemplatedVocabulary<TDescriptor,F>::HKmeansStep(NodeId parent_id,
         }
       }
 
-			if(goon)
-			{
-				// copy last feature-cluster association
-				last_association = current_association;
-				//last_assoc = assoc.clone();
-			}
-			
-		} // while(goon)
+      if(goon)
+      {
+          // copy last feature-cluster association
+          last_association = current_association;
+          //last_assoc = assoc.clone();
+      }
+
+    } // while(goon)
     
   } // if must run kmeans
   
@@ -1359,7 +1359,7 @@ bool TemplatedVocabulary<TDescriptor,F>::loadFromTextFile(const std::string &fil
     if(m_k<0 || m_k>20 || m_L<1 || m_L>10 || n1<0 || n1>5 || n2<0 || n2>3)
     {
         std::cerr << "Vocabulary loading failure: This is not a correct text file!" << endl;
-	return false;
+	    return false;
     }
     
     m_scoring = (ScoringType)n1;
@@ -1384,7 +1384,7 @@ bool TemplatedVocabulary<TDescriptor,F>::loadFromTextFile(const std::string &fil
 
         int nid = m_nodes.size();
         m_nodes.resize(m_nodes.size()+1);
-	m_nodes[nid].id = nid;
+	    m_nodes[nid].id = nid;
 	
         int pid ;
         ssnode >> pid;
@@ -1400,7 +1400,7 @@ bool TemplatedVocabulary<TDescriptor,F>::loadFromTextFile(const std::string &fil
             string sElement;
             ssnode >> sElement;
             ssd << sElement << " ";
-	}
+	    }
         F::fromString(m_nodes[nid].descriptor, ssd.str());
 
         ssnode >> m_nodes[nid].weight;

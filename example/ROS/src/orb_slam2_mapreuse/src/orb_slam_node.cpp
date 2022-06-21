@@ -40,7 +40,7 @@ public:
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "orb_mapping_node");
+    ros::init(argc, argv, "orb_slam_node");
     ros::NodeHandle nh("~");
 
     if (argc != 2)

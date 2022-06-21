@@ -105,7 +105,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
     }
 
     if(lKFsSharingWords.empty())
-        return vector<KeyFrame*>();
+        return {};
 
     list<pair<float,KeyFrame*> > lScoreAndMatch;
 
@@ -134,12 +134,12 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
 
             pKFi->mLoopScore = si;
             if(si>=minScore)
-                lScoreAndMatch.push_back(make_pair(si,pKFi));
+                lScoreAndMatch.emplace_back(si,pKFi);
         }
     }
 
     if(lScoreAndMatch.empty())
-        return vector<KeyFrame*>();
+        return {};
 
     list<pair<float,KeyFrame*> > lAccScoreAndMatch;
     float bestAccScore = minScore;
@@ -167,7 +167,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
             }
         }
 
-        lAccScoreAndMatch.push_back(make_pair(accScore,pBestKF));
+        lAccScoreAndMatch.emplace_back(accScore,pBestKF);
         if(accScore>bestAccScore)
             bestAccScore=accScore;
     }
@@ -178,6 +178,24 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
     set<KeyFrame*> spAlreadyAddedKF;
     vector<KeyFrame*> vpLoopCandidates;
     vpLoopCandidates.reserve(lAccScoreAndMatch.size());
+    // vpLoopCandidates.reserve(20);
+    // lAccScoreAndMatch.sort([] (pair<float,KeyFrame*> x, pair<float,KeyFrame*> y) {return x.first > y.first;});
+    //
+    // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // {
+    //     if(vpLoopCandidates.size() < 20)
+    //     {
+    //         KeyFrame* pKFi = it->second;
+    //         if(!spAlreadyAddedKF.count(pKFi))
+    //         {
+    //             vpLoopCandidates.push_back(pKFi);
+    //             spAlreadyAddedKF.insert(pKFi);
+    //         }
+    //     } else
+    //     {
+    //         break;
+    //     }
+    // }
 
     for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
     {
@@ -222,7 +240,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
         }
     }
     if(lKFsSharingWords.empty())
-        return vector<KeyFrame*>();
+        return {};
 
     // Only compare against those keyframes that share enough words
     int maxCommonWords=0;
@@ -248,12 +266,12 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             nscores++;
             float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
             pKFi->mRelocScore=si;
-            lScoreAndMatch.push_back(make_pair(si,pKFi));
+            lScoreAndMatch.emplace_back(si,pKFi);
         }
     }
 
     if(lScoreAndMatch.empty())
-        return vector<KeyFrame*>();
+        return {};
 
     list<pair<float,KeyFrame*> > lAccScoreAndMatch;
     float bestAccScore = 0;
@@ -281,7 +299,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             }
 
         }
-        lAccScoreAndMatch.push_back(make_pair(accScore,pBestKF));
+        lAccScoreAndMatch.emplace_back(accScore,pBestKF);
         if(accScore>bestAccScore)
             bestAccScore=accScore;
     }
@@ -290,11 +308,13 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     float minScoreToRetain = 0.75f*bestAccScore;
     set<KeyFrame*> spAlreadyAddedKF;
     vector<KeyFrame*> vpRelocCandidates;
-    vpRelocCandidates.reserve(lAccScoreAndMatch.size());
+    // vpRelocCandidates.reserve(lAccScoreAndMatch.size());
+    vpRelocCandidates.reserve(20);
+    lAccScoreAndMatch.sort([] (pair<float,KeyFrame*> x, pair<float,KeyFrame*> y) {return x.first > y.first;});
+
     for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
     {
-        const float &si = it->first;
-        if(si>minScoreToRetain)
+        if(vpRelocCandidates.size() < 20)
         {
             KeyFrame* pKFi = it->second;
             if(!spAlreadyAddedKF.count(pKFi))
@@ -302,8 +322,25 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
                 vpRelocCandidates.push_back(pKFi);
                 spAlreadyAddedKF.insert(pKFi);
             }
+        } else
+        {
+            break;
         }
     }
+
+    // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // {
+    //     const float &si = it->first;
+    //     if(si>minScoreToRetain)
+    //     {
+    //         KeyFrame* pKFi = it->second;
+    //         if(!spAlreadyAddedKF.count(pKFi))
+    //         {
+    //             vpRelocCandidates.push_back(pKFi);
+    //             spAlreadyAddedKF.insert(pKFi);
+    //         }
+    //     }
+    // }
 
     return vpRelocCandidates;
 }

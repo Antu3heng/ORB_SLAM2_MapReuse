@@ -10,7 +10,7 @@
 
 int main()
 {
-    cv::Mat descriptors(2000, 32, CV_8UC1);
+    cv::Mat descriptors = cv::Mat::zeros(2000, 32, CV_8UC1);
     auto model = std::make_shared<ORBrefiner>(256, 256, Binary);
     model->eval();
     torch::load(model, "/home/antusheng/Desktop/orb_refine_binary.pt");

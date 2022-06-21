@@ -6,11 +6,13 @@ SLAM Mode with map reuse still has some bugs to be fixed.
 - [x] fix the bug in keyframe and mappoint creating on the process of map load
 
 ## 1. Introduction
-Using boost serialization to save and reuse the map in ORB-SLAM2.
+Save and reuse the map in ORB-SLAM2.
 
 ## 2. Prerequisites
 This project has been tested with the libraries in **Ubuntu 18.04**.
-+ C++11 or C++0x Compiler
++ C++14
+
++ Libtorch
 
 + Pangolin
 

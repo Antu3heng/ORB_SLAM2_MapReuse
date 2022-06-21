@@ -5,40 +5,30 @@
 #--------------------------------------------------------------------------------------------
 
 # Camera type (0: MONOCULAR, 1: STEREO, 2: RGBD)
-Camera.type: 2
+Camera.type: 0
 
 # Camera ROS topic
-Camera.image0Topic: "/d400/color/image_raw"
-Camera.image1Topic: "/d400/aligned_depth_to_color/image_raw"
+Camera.image0Topic: "/device_0/sensor_1/Color_0/image/data" #"/d400/color/image_raw"
 
 # Camera calibration and distortion parameters (OpenCV) 
-Camera.fx: 601.3178100585938
-Camera.fy: 600.1730346679688
-Camera.cx: 316.90240478515625
-Camera.cy: 233.21038818359375
+Camera.fx: 901.9766845703125
+Camera.fy: 900.259521484375
+Camera.cx: 635.3535766601562
+Camera.cy: 349.8155822753906
 
 Camera.k1: 0.0
 Camera.k2: 0.0
 Camera.p1: 0.0
 Camera.p2: 0.0
 
-Camera.width: 640
-Camera.height: 480
+Camera.width: 1280
+Camera.height: 720
 
 # Camera frames per second 
 Camera.fps: 30.0
 
-# IR projector baseline times fx (aprox.)(d455 baseline: 95mm, d435/d435i baseline: 50mm)
-Camera.bf: 30.2357818 # todo: check out
-
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
 Camera.RGB: 1
-
-# Close/Far threshold. Baseline times.
-ThDepth: 40.0
-
-# Deptmap values factor
-DepthMapFactor: 1000.0
 
 #--------------------------------------------------------------------------------------------
 # ORB Parameters

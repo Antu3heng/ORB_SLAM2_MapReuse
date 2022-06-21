@@ -15,7 +15,14 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
 
-cd ../../../
+cd ../../
+
+echo "Downloading and uncompress the Libtorch ..."
+
+wget -O libtorch.zip https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.6.0%2Bcpu.zip
+unzip libtorch.zip
+
+cd ../
 
 echo "Uncompress vocabulary ..."
 

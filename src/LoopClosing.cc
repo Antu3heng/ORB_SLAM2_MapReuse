@@ -37,8 +37,8 @@ namespace ORB_SLAM2_MapReuse
 
 LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, const bool bFixScale):
     mbResetRequested(false), mbFinishRequested(false), mbFinished(true), mpMap(pMap),
-    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
-    mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale), mnFullBAIdx(0)
+    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(nullptr), mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
+    mbStopGBA(false), mpThreadGBA(nullptr), mbFixScale(bFixScale), mnFullBAIdx(0)
 {
     mnCovisibilityConsistencyTh = 3;
 }
@@ -63,8 +63,14 @@ void LoopClosing::Run()
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames())
         {
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+            bool tmp = DetectLoop();
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+            double tquery= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+            mvTimeQuery.push_back(tquery);
+            if (tmp)
             // Detect loop candidates and check covisibility consistency
-            if(DetectLoop())
+            // if(DetectLoop())
             {
                // Compute similarity transformation [sR|t]
                // In the stereo/RGBD case s=1
@@ -79,7 +85,24 @@ void LoopClosing::Run()
         ResetIfRequested();
 
         if(CheckFinish())
+        {
+            double totalDetectTime = 0;
+            for(double t: mvTimeQuery)
+            {
+                totalDetectTime += t;
+            }
+            double totalFindTime = 0;
+            for(double t: mvTimeFind)
+            {
+                totalFindTime += t;
+            }
+            cout << "-------" << endl << endl;
+            cout << mlpLoopKeyFrameQueue.size() << endl;
+            cout << "mean detect loop time: " << totalDetectTime / mvTimeQuery.size() << endl << endl;
+            cout << "mean find candidate time: " << totalFindTime / mvTimeFind.size() << endl;
             break;
+        }
+            // break;
 
         usleep(5000);
     }
@@ -138,7 +161,11 @@ bool LoopClosing::DetectLoop()
     }
 
     // Query the database imposing the minimum score
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectLoopCandidates(mpCurrentKF, minScore);
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    double tfind= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+    mvTimeFind.push_back(tfind);
 
     // If there are no loop candidates, just add new keyframe and return false
     if(vpCandidateKFs.empty())
@@ -236,7 +263,8 @@ bool LoopClosing::ComputeSim3()
 
     // We compute first ORB matches for each candidate
     // If enough matches are found, we setup a Sim3Solver
-    ORBmatcher matcher(0.75,true);
+    // ORBmatcher matcher(0.75,true);
+    ORBmatcher matcher(0.75,false);
 
     vector<Sim3Solver*> vpSim3Solvers;
     vpSim3Solvers.resize(nInitialCandidates);
@@ -276,8 +304,23 @@ bool LoopClosing::ComputeSim3()
             vpSim3Solvers[i] = pSolver;
         }
 
+        // cout << fixed;
+        // cout << setprecision(6) << mpCurrentKF->mTimeStamp << " " << pKF->mTimeStamp << endl;
+
         nCandidates++;
     }
+
+    // if(nCandidates != 0)
+    //     cout << "num of consistent candidates: " << nInitialCandidates << " num of candidates: " << nCandidates << endl;
+
+    // if(nCandidates == 0)
+    // {
+    //     for(int i=0; i<nInitialCandidates; i++)
+    //         mvpEnoughConsistentCandidates[i]->SetErase();
+    //     mpCurrentKF->SetErase();
+    //     cout << "No Candidates!!" << endl;
+    //     return false;
+    // }
 
     bool bMatch = false;
 
@@ -394,6 +437,7 @@ bool LoopClosing::ComputeSim3()
         for(int i=0; i<nInitialCandidates; i++)
             mvpEnoughConsistentCandidates[i]->SetErase();
         mpCurrentKF->SetErase();
+        cout << "No enough matches" << endl;
         return false;
     }
 
@@ -586,7 +630,8 @@ void LoopClosing::CorrectLoop()
 
 void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
 {
-    ORBmatcher matcher(0.8);
+    // ORBmatcher matcher(0.8);
+    ORBmatcher matcher(0.8, false);
 
     for(KeyFrameAndPose::const_iterator mit=CorrectedPosesMap.begin(), mend=CorrectedPosesMap.end(); mit!=mend;mit++)
     {

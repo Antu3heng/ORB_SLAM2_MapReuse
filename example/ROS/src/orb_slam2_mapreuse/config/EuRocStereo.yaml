@@ -130,7 +130,8 @@ Viewer.ViewpointF: 500
 #--------------------------------------------------------------------------------------------
 # ORB Vocabulary Parameters
 #--------------------------------------------------------------------------------------------
-Vocabulary.Path: "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Vocabulary/ORBvoc.txt"
+#Vocabulary.Path: "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Vocabulary/ORBvoc.txt"
+Vocabulary.Path: "/home/antusheng/Desktop/voc.txt"
 
 #--------------------------------------------------------------------------------------------
 # Map save and reuse Parameters

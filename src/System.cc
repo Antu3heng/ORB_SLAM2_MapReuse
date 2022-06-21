@@ -401,9 +401,9 @@ namespace ORB_SLAM2_MapReuse
             {
                 if (!(*itFlag))
                 {
-                    f << setprecision(6) << *itT << " " << setprecision(9) << double(0) << " " << double(0) << " "
-                      << double(0) << " " << double(0) << " " << double(0) << " " << double(0) << " " << double(0)
-                      << endl;
+                    // f << setprecision(6) << *itT << " " << setprecision(9) << double(0) << " " << double(0) << " "
+                    //   << double(0) << " " << double(0) << " " << double(0) << " " << double(0) << " " << double(0)
+                    //   << endl;
                     continue;
                 }
 
@@ -415,7 +415,8 @@ namespace ORB_SLAM2_MapReuse
                   << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
             }
 
-            mpLocator->CalculateRecall();
+            float recallRate = mpLocator->CalculateRecall();;
+            cout << "Recall rate: " << recallRate << endl;
         }
 
         f.close();

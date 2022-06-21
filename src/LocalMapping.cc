@@ -213,6 +213,7 @@ void LocalMapping::CreateNewMapPoints()
     const vector<KeyFrame*> vpNeighKFs = mpCurrentKeyFrame->GetBestCovisibilityKeyFrames(nn);
 
     ORBmatcher matcher(0.6,false);
+    // ORBmatcher matcher(1.0,false);
 
     cv::Mat Rcw1 = mpCurrentKeyFrame->GetRotation();
     cv::Mat Rwc1 = Rcw1.t();
