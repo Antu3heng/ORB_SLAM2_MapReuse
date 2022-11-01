@@ -50,7 +50,7 @@ namespace ORB_SLAM2_MapReuse
         ORBVocabulary *mpVocabulary;
         KeyFrameDatabase *mpKeyFrameDatabase;
         ORBextractor *mpORBextractor;
-        shared_ptr<ORBrefiner> mpORBrefiner;
+        ORBrefiner mORBrefiner;
         cv::Mat mK;
         cv::Mat mDistCoef;
         float mbf;

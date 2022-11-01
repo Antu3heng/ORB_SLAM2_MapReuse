@@ -110,8 +110,8 @@ ORBextractor.nLevels: 8
 ORBextractor.iniThFAST: 20
 ORBextractor.minThFAST: 7
 
-ORBrefiner.Used: 0
-ORBrefiner.Path: "/home/antusheng/Desktop/orb-binary.pt"
+ORBrefiner.Used: 1
+ORBrefiner.Path: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/checkpoints/orbslam2-binary.pt"
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
@@ -130,8 +130,7 @@ Viewer.ViewpointF: 500
 #--------------------------------------------------------------------------------------------
 # ORB Vocabulary Parameters
 #--------------------------------------------------------------------------------------------
-#Vocabulary.Path: "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Vocabulary/ORBvoc.txt"
-Vocabulary.Path: "/home/antusheng/Desktop/voc.txt"
+Vocabulary.Path: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/Vocabulary/ORBvoc.txt"
 
 #--------------------------------------------------------------------------------------------
 # Map save and reuse Parameters
@@ -141,4 +140,4 @@ Map.Path: "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReu
 #--------------------------------------------------------------------------------------------
 # Trajectory Parameters
 #--------------------------------------------------------------------------------------------
-Trajectory.SavePath: "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/test_result/trajectory/"
+Trajectory.SavePath: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/result/"

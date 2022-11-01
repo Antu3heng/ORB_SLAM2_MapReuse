@@ -117,6 +117,8 @@ public:
 
     void Reset();
 
+    bool mbRefineORB;
+
 protected:
 
     // Main tracking function. It is independent of the input sensor.
@@ -159,8 +161,7 @@ protected:
     //ORB
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
     ORBextractor* mpIniORBextractor;
-    bool mbRefineORB;
-    shared_ptr<ORBrefiner> mpORBrefiner;
+    ORBrefiner mORBrefiner;
 
     //BoW
     ORBVocabulary* mpORBVocabulary;

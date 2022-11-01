@@ -22,7 +22,7 @@ find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
 find_package(Pangolin REQUIRED)
 
-find_package(Torch REQUIRED PATHS /home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/libtorch/share/cmake/Torch NO_DEFAULT_PATH)
+find_package(Torch REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../../../../Thirdparty/libtorch/share/cmake/Torch NO_DEFAULT_PATH)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 catkin_package()
@@ -34,8 +34,8 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   ${Pangolin_INCLUDE_DIRS}
   ${TORCH_INCLUDE_DIRS}
-  "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse"
-  "/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/include"
+  "${PROJECT_SOURCE_DIR}/../../../.."
+  "${PROJECT_SOURCE_DIR}/../../../../include"
 )
 
 set(LIBS 
@@ -44,9 +44,9 @@ ${EIGEN3_LIBS}
 ${Boost_LIBRARIES}
 ${Pangolin_LIBRARIES}
 ${TORCH_LIBRARIES}
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/DBoW2/lib/libDBoW2.so
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/Thirdparty/g2o/lib/libg2o.so
-/home/antusheng/research/map_based_localization/test/ORB_SLAM2_MapReuse/lib/libORB_SLAM2_MapReuse.so
+${PROJECT_SOURCE_DIR}/../../../../Thirdparty/DBoW2/lib/libDBoW2.so
+${PROJECT_SOURCE_DIR}/../../../../Thirdparty/g2o/lib/libg2o.so
+${PROJECT_SOURCE_DIR}/../../../../lib/libORB_SLAM2_MapReuse.so
 )
 
 add_executable(orb_mapping_node src/orb_mapping_node.cpp)

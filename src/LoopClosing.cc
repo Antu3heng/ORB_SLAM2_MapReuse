@@ -263,8 +263,11 @@ bool LoopClosing::ComputeSim3()
 
     // We compute first ORB matches for each candidate
     // If enough matches are found, we setup a Sim3Solver
-    // ORBmatcher matcher(0.75,true);
-    ORBmatcher matcher(0.75,false);
+    ORBmatcher matcher;
+    // if (!mpTracker->mbRefineORB)
+        matcher = ORBmatcher(0.75,true);
+    // else
+    //     matcher = ORBmatcher(0.75,false);
 
     vector<Sim3Solver*> vpSim3Solvers;
     vpSim3Solvers.resize(nInitialCandidates);
@@ -630,8 +633,11 @@ void LoopClosing::CorrectLoop()
 
 void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
 {
-    // ORBmatcher matcher(0.8);
-    ORBmatcher matcher(0.8, false);
+    ORBmatcher matcher;
+    // if (!mpTracker->mbRefineORB)
+        matcher = ORBmatcher(0.8);
+    // else
+    //     matcher = ORBmatcher(0.8, false);
 
     for(KeyFrameAndPose::const_iterator mit=CorrectedPosesMap.begin(), mend=CorrectedPosesMap.end(); mit!=mend;mit++)
     {

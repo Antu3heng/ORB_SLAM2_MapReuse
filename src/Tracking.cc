@@ -128,11 +128,18 @@ namespace ORB_SLAM2_MapReuse
         mbRefineORB = nORBrefiner;
         if (mbRefineORB) cout << "Use ORB refine!!!" << endl;
 
-        mpORBrefiner = make_shared<ORBrefiner>(256, 256, Binary);
-        mpORBrefiner->eval();
+        mORBrefiner = ORBrefiner();
         string refinerModelPath;
         fSettings["ORBrefiner.Path"] >> refinerModelPath;
-        torch::load(mpORBrefiner, refinerModelPath);
+        torch::load(mORBrefiner, refinerModelPath);
+        if (torch::cuda::is_available())
+        {
+            std::cout << "CUDA is available! Using CUDA!" << std::endl;
+            mORBrefiner->to(torch::kCUDA);
+        }
+        else
+            std::cout << "CUDA is not available!" << std::endl;
+        mORBrefiner->eval();
 
         cout << endl << "ORB Extractor Parameters: " << endl;
         cout << "- Number of Features: " << nFeatures << endl;
@@ -204,7 +211,7 @@ namespace ORB_SLAM2_MapReuse
         }
 
         mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpORBextractorLeft, mpORBextractorRight, mpORBVocabulary,
-                              mK, mDistCoef, mbf, mThDepth, mpORBrefiner, mbRefineORB);
+                              mK, mDistCoef, mbf, mThDepth, mORBrefiner, mbRefineORB);
 
         Track();
 
@@ -235,7 +242,7 @@ namespace ORB_SLAM2_MapReuse
             imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
         mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, mpORBVocabulary, mK, mDistCoef, mbf,
-                              mThDepth, mpORBrefiner, mbRefineORB);
+                              mThDepth, mORBrefiner, mbRefineORB);
 
         Track();
 
@@ -262,10 +269,10 @@ namespace ORB_SLAM2_MapReuse
         }
 
         if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
-            mCurrentFrame = Frame(mImGray, timestamp, mpIniORBextractor, mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, mpORBrefiner, mbRefineORB);
+            mCurrentFrame = Frame(mImGray, timestamp, mpIniORBextractor, mpORBVocabulary, mK, mDistCoef, mbf, mThDepth, mORBrefiner, mbRefineORB);
         else
             mCurrentFrame = Frame(mImGray, timestamp, mpORBextractorLeft, mpORBVocabulary, mK, mDistCoef, mbf,
-                                  mThDepth, mpORBrefiner, mbRefineORB);
+                                  mThDepth, mORBrefiner, mbRefineORB);
 
         Track();
 
@@ -593,8 +600,11 @@ namespace ORB_SLAM2_MapReuse
             }
 
             // Find correspondences
-            ORBmatcher matcher(0.9, true);
-            // ORBmatcher matcher(1.0, false);
+            ORBmatcher matcher;
+            // if (!mbRefineORB)
+                matcher = ORBmatcher(0.9, true);
+            // else
+            //     matcher = ORBmatcher(0.9, false);
             int nmatches = matcher.SearchForInitialization(mInitialFrame, mCurrentFrame, mvbPrevMatched, mvIniMatches,
                                                            100);
 
@@ -760,8 +770,11 @@ namespace ORB_SLAM2_MapReuse
 
         // We perform first an ORB matching with the reference keyframe
         // If enough matches are found we setup a PnP solver
-        ORBmatcher matcher(0.7, true);
-        // ORBmatcher matcher(1.0, false);
+        ORBmatcher matcher;
+        // if (!mbRefineORB)
+            matcher = ORBmatcher(0.7, true);
+        // else
+        //     matcher = ORBmatcher(0.7, false);
         vector<MapPoint *> vpMapPointMatches;
 
         int nmatches = matcher.SearchByBoW(mpReferenceKF, mCurrentFrame, vpMapPointMatches);
@@ -860,8 +873,11 @@ namespace ORB_SLAM2_MapReuse
 
     bool Tracking::TrackWithMotionModel()
     {
-        ORBmatcher matcher(0.9, true);
-        // ORBmatcher matcher(1.0, false);
+        ORBmatcher matcher;
+        // if (!mbRefineORB)
+            matcher = ORBmatcher(0.9, true);
+        // else
+        //     matcher = ORBmatcher(0.9, false);
 
         // Update last frame pose according to its reference keyframe
         // Create "visual odometry" points if in Localization Mode
@@ -1170,8 +1186,11 @@ namespace ORB_SLAM2_MapReuse
 
         if (nToMatch > 0)
         {
-            ORBmatcher matcher(0.8);
-            // ORBmatcher matcher(1.0, false);
+            ORBmatcher matcher;
+            // if (!mbRefineORB)
+                matcher = ORBmatcher(0.8);
+            // else
+            //     matcher = ORBmatcher(0.8, false);
             int th = 1;
             if (mSensor == System::RGBD)
                 th = 3;
@@ -1349,8 +1368,11 @@ namespace ORB_SLAM2_MapReuse
 
         // We perform first an ORB matching with each candidate
         // If enough matches are found we setup a PnP solver
-        ORBmatcher matcher(0.75, true);
-        // ORBmatcher matcher(0.75, false);
+        ORBmatcher matcher;
+        // if (!mbRefineORB)
+            matcher = ORBmatcher(0.75, true);
+        // else
+        //     matcher = ORBmatcher(0.75, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -1388,8 +1410,11 @@ namespace ORB_SLAM2_MapReuse
         // Alternatively perform some iterations of P4P RANSAC
         // Until we found a camera pose supported by enough inliers
         bool bMatch = false;
-        ORBmatcher matcher2(0.9, true);
-        // ORBmatcher matcher2(1.0, false);
+        ORBmatcher matcher2;
+        // if (!mbRefineORB)
+            matcher2 = ORBmatcher(0.9, true);
+        // else
+        //     matcher2 = ORBmatcher(0.9, false);
 
         while (nCandidates > 0 && !bMatch)
         {

@@ -82,12 +82,20 @@ namespace ORB_SLAM2_MapReuse
 
         int nORBrefiner = fsSettings["ORBrefiner.Used"];
         mbRefineORB = nORBrefiner;
+        if (mbRefineORB) cout << "Use ORB refine!!!" << endl;
 
-        mpORBrefiner = make_shared<ORBrefiner>(256, 256, Binary);
-        mpORBrefiner->eval();
+        mORBrefiner = ORBrefiner();
         string refinerModelPath;
         fsSettings["ORBrefiner.Path"] >> refinerModelPath;
-        torch::load(mpORBrefiner, refinerModelPath);
+        torch::load(mORBrefiner, refinerModelPath);
+        if (torch::cuda::is_available())
+        {
+            std::cout << "CUDA is available! Using CUDA!" << std::endl;
+            mORBrefiner->to(torch::kCUDA);
+        }
+        else
+            std::cout << "CUDA is not available!" << std::endl;
+        mORBrefiner->eval();
 
         cout << endl << "ORB Extractor Parameters: " << endl;
         cout << "- Number of Features: " << nFeatures << endl;
@@ -114,7 +122,7 @@ namespace ORB_SLAM2_MapReuse
             else
                 cvtColor(ImGray, ImGray, CV_BGRA2GRAY);
         }
-        mCurrentFrame = Frame(ImGray, timestamp, mpORBextractor, mpVocabulary, mK, mDistCoef, mbf, 0.0f, mpORBrefiner, mbRefineORB);
+        mCurrentFrame = Frame(ImGray, timestamp, mpORBextractor, mpVocabulary, mK, mDistCoef, mbf, 0.0f, mORBrefiner, mbRefineORB);
 
         if (VisualLocalization())
         {
@@ -150,8 +158,11 @@ namespace ORB_SLAM2_MapReuse
 
         const int nKFs = vpCandidateKFs.size();
 
-        ORBmatcher matcher(0.75, true);
-        // ORBmatcher matcher(0.75, false);
+        ORBmatcher matcher;
+        // if (!mbRefineORB)
+            matcher = ORBmatcher(0.75, true);
+        // else
+        //     matcher = ORBmatcher(0.75, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -187,8 +198,11 @@ namespace ORB_SLAM2_MapReuse
         }
 
         bool bMatch = false;
-        ORBmatcher matcher2(0.9, true);
-        // ORBmatcher matcher2(0.9, false);
+        ORBmatcher matcher2;
+        // if (!mbRefineORB)
+            matcher2 = ORBmatcher(0.9, true);
+        // else
+        //     matcher2 = ORBmatcher(0.9, false);
 
         while (nCandidates > 0 && !bMatch)
         {
