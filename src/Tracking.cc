@@ -274,6 +274,9 @@ namespace ORB_SLAM2_MapReuse
             mCurrentFrame = Frame(mImGray, timestamp, mpORBextractorLeft, mpORBVocabulary, mK, mDistCoef, mbf,
                                   mThDepth, mORBrefiner, mbRefineORB);
 
+        count++;
+        total_num_features += mCurrentFrame.mvKeys.size();
+        
         Track();
 
         return mCurrentFrame.mTcw.clone();
@@ -604,7 +607,7 @@ namespace ORB_SLAM2_MapReuse
             // if (!mbRefineORB)
                 matcher = ORBmatcher(0.9, true);
             // else
-            //     matcher = ORBmatcher(0.9, false);
+            //     matcher = ORBmatcher(0.7, false);
             int nmatches = matcher.SearchForInitialization(mInitialFrame, mCurrentFrame, mvbPrevMatched, mvIniMatches,
                                                            100);
 
@@ -877,7 +880,7 @@ namespace ORB_SLAM2_MapReuse
         // if (!mbRefineORB)
             matcher = ORBmatcher(0.9, true);
         // else
-        //     matcher = ORBmatcher(0.9, false);
+        //     matcher = ORBmatcher(0.7, false);
 
         // Update last frame pose according to its reference keyframe
         // Create "visual odometry" points if in Localization Mode
@@ -1190,7 +1193,7 @@ namespace ORB_SLAM2_MapReuse
             // if (!mbRefineORB)
                 matcher = ORBmatcher(0.8);
             // else
-            //     matcher = ORBmatcher(0.8, false);
+            //     matcher = ORBmatcher(0.7, false);
             int th = 1;
             if (mSensor == System::RGBD)
                 th = 3;
@@ -1372,7 +1375,7 @@ namespace ORB_SLAM2_MapReuse
         // if (!mbRefineORB)
             matcher = ORBmatcher(0.75, true);
         // else
-        //     matcher = ORBmatcher(0.75, false);
+        //     matcher = ORBmatcher(0.7, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -1414,7 +1417,7 @@ namespace ORB_SLAM2_MapReuse
         // if (!mbRefineORB)
             matcher2 = ORBmatcher(0.9, true);
         // else
-        //     matcher2 = ORBmatcher(0.9, false);
+        //     matcher2 = ORBmatcher(0.8, false);
 
         while (nCandidates > 0 && !bMatch)
         {

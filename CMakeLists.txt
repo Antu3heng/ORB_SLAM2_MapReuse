@@ -101,11 +101,17 @@ target_link_libraries(orb_mapping_mono ${PROJECT_NAME})
 add_executable(orb_localization_mono example/CPP/orb_localization_mono.cc)
 target_link_libraries(orb_localization_mono ${PROJECT_NAME})
 
+add_executable(mono_euroc example/CPP/mono_euroc.cc)
+target_link_libraries(mono_euroc ${PROJECT_NAME})
+
 add_executable(stereo_euroc example/CPP/stereo_euroc.cpp)
 target_link_libraries(stereo_euroc ${PROJECT_NAME})
 
 add_executable(stereo_euroc_localization example/CPP/stereo_euroc_localization.cpp)
 target_link_libraries(stereo_euroc_localization ${PROJECT_NAME})
+
+add_executable(mono_kitti example/CPP/mono_kitti.cc)
+target_link_libraries(mono_kitti ${PROJECT_NAME})
 
 add_executable(stereo_kitti example/CPP/stereo_kitti.cc)
 target_link_libraries(stereo_kitti ${PROJECT_NAME})
@@ -113,3 +119,14 @@ target_link_libraries(stereo_kitti ${PROJECT_NAME})
 add_executable(test_libtorch example/CPP/test_libtorch.cpp src/ORBrefiner.cc)
 target_link_libraries(test_libtorch ${TORCH_LIBRARIES} ${OpenCV_LIBS})
 
+add_executable(train_bow example/CPP/train_bow.cpp src/ORBextractor.cc src/ORBrefiner.cc)
+target_link_libraries(train_bow ${TORCH_LIBRARIES} ${OpenCV_LIBS} ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so)
+
+add_executable(test_sp example/CPP/test_sp.cpp)
+target_link_libraries(test_sp ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(test_orb example/CPP/test_orb.cpp)
+target_link_libraries(test_orb ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(test_sp_extract example/CPP/test_sp_extract.cpp src/SuperPoint.cc)
+target_link_libraries(test_sp_extract ${TORCH_LIBRARIES} ${OpenCV_LIBS})

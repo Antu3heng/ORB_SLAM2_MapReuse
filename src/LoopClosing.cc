@@ -637,7 +637,7 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
     // if (!mpTracker->mbRefineORB)
         matcher = ORBmatcher(0.8);
     // else
-    //     matcher = ORBmatcher(0.8, false);
+    //     matcher = ORBmatcher(0.7, false);
 
     for(KeyFrameAndPose::const_iterator mit=CorrectedPosesMap.begin(), mend=CorrectedPosesMap.end(); mit!=mend;mit++)
     {

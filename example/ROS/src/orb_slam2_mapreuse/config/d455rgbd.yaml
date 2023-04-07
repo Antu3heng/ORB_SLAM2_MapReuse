@@ -1,0 +1,101 @@
+%YAML:1.0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters. Adjust them!
+#--------------------------------------------------------------------------------------------
+
+# Camera type (0: MONOCULAR, 1: STEREO, 2: RGBD)
+Camera.type: 2
+
+# Camera ROS topic
+Camera.image0Topic: "/d400/color/image_raw"
+Camera.image1Topic: "/d400/aligned_depth_to_color/image_raw"
+
+# Camera calibration and distortion parameters (OpenCV) 
+Camera.fx: 384.223083
+Camera.fy: 383.963409
+Camera.cx: 315.039368
+Camera.cy: 245.009705
+
+Camera.k1: -0.054248
+Camera.k2: 0.061805
+Camera.p1: -0.000471
+Camera.p2: -0.000350
+
+Camera.width: 640
+Camera.height: 480
+
+# Camera frames per second 
+Camera.fps: 30.0
+
+# IR projector baseline times fx (aprox.)(d455 baseline: 95mm, d435/d435i baseline: 50mm)
+Camera.bf: 36.58975 # todo: check out
+
+# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+
+# Close/Far threshold. Baseline times.
+ThDepth: 40.0
+
+# Deptmap values factor
+DepthMapFactor: 1000.0
+
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+
+# ORB Extractor: Number of features per image
+ORBextractor.nFeatures: 1500
+
+# ORB Extractor: Scale factor between levels in the scale pyramid
+ORBextractor.scaleFactor: 1.2
+
+# ORB Extractor: Number of levels in the scale pyramid
+ORBextractor.nLevels: 8
+
+# ORB Extractor: Fast threshold
+# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+# You can lower these values if your images have low contrast
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+ORBrefiner.Used: 0
+ORBrefiner.Path: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/checkpoints/orbslam2-binary.pt"
+
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+
+#--------------------------------------------------------------------------------------------
+# ORB Vocabulary Parameters
+#--------------------------------------------------------------------------------------------
+Vocabulary.Path: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/Vocabulary/ORBvoc.txt"
+
+#--------------------------------------------------------------------------------------------
+# Map save and reuse Parameters
+#--------------------------------------------------------------------------------------------
+Map.Path: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/result/map.bin"
+
+#--------------------------------------------------------------------------------------------
+# Trajectory Parameters
+#--------------------------------------------------------------------------------------------
+Trajectory.SavePath: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/result/matching_retrieval_booster/"
+
+#--------------------------------------------------------------------------------------------
+# Localization Parameters
+#--------------------------------------------------------------------------------------------
+Localization.AblationTest: 1
+Localization.MatchingUsingBooster: 1
+Localization.RetrievalUsingBooster: 1
+Localization.BoosterVocPath: "/home/drone/wxj/myCode/ORB_SLAM2_MapReuse/Vocabulary/voc.txt"

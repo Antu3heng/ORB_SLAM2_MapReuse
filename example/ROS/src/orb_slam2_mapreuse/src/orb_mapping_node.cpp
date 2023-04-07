@@ -36,6 +36,7 @@ public:
     ORB_SLAM2_MapReuse::System *mpMapper;
     bool do_rectify;
     cv::Mat M1l, M2l, M1r, M2r;
+    int count = 0;
 };
 
 int main(int argc, char **argv)
@@ -155,6 +156,8 @@ int main(int argc, char **argv)
     Mapper.SaveMap(mapSavePath);
     // Mapper.SaveMapUsingBoost(mapSavePath); // using boost save the map
 
+    std::cout << igb.count << std::endl;
+
     return 0;
 }
 
@@ -237,6 +240,8 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr &msgRGB, const sens
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
     }
+
+    count++;
 
     mpMapper->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image, cv_ptrRGB->header.stamp.toSec());
 }

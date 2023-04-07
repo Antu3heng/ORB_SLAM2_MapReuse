@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 {
     if(argc != 5)
     {
-        cerr << endl << "Usage: ./stereo_euroc_localization path_to_config path_to_left_folder path_to_times_file" << endl;
+        cerr << endl << "Usage: ./stereo_euroc_localization path_to_config path_to_left_folder path_to_right_folder path_to_times_file" << endl;
         return 1;
     }
 

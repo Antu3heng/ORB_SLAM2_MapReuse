@@ -36,9 +36,9 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
 
 int main(int argc, char **argv)
 {
-    if(argc != 3)
+    if(argc != 4)
     {
-        cerr << endl << "Usage: ./stereo_kitti path_to_settings path_to_sequence" << endl;
+        cerr << endl << "Usage: ./stereo_kitti path_to_settings path_to_sequence do_refine" << endl;
         return 1;
     }
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     cameraType = ORB_SLAM2_MapReuse::System::STEREO;
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2_MapReuse::System SLAM(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, true);;
+    ORB_SLAM2_MapReuse::System SLAM(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, false);;
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -116,8 +116,21 @@ int main(int argc, char **argv)
     cout << "median tracking time: " << vTimesTrack[nImages/2] << endl;
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
+    int refine = atoi(argv[3]);
+    string save_path, save_path_kf;
+    if (refine)
+    {
+        save_path = string(argv[2]) + "FrameTrajectory_rf.txt";
+        save_path_kf = string(argv[2]) + "KeyFrameTrajectory_rf.tum";
+    }
+    else
+    {
+        save_path = string(argv[2]) + "FrameTrajectory.txt";
+        save_path_kf = string(argv[2]) + "KeyFrameTrajectory.tum";
+    }
     // Save camera trajectory
-    SLAM.SaveTrajectoryKITTI("KittiCameraTrajectory.txt");
+    SLAM.SaveKeyFrameTrajectoryTUM(save_path_kf);    
+    SLAM.SaveTrajectoryKITTI(save_path);
 
     return 0;
 }

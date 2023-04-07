@@ -107,7 +107,8 @@ DescriptorEncoderImpl::DescriptorEncoderImpl()
 
 torch::Tensor DescriptorEncoderImpl::forward(torch::Tensor descs)
 {
-    return encoder->forward(descs);
+    auto residual = descs;
+    return residual + encoder->forward(descs);
 }
 
 HydraAttentionImpl::HydraAttentionImpl(int d_model)
@@ -115,6 +116,7 @@ HydraAttentionImpl::HydraAttentionImpl(int d_model)
     query = register_module("query", torch::nn::Linear(torch::nn::LinearOptions(d_model, d_model)));
     key = register_module("key", torch::nn::Linear(torch::nn::LinearOptions(d_model, d_model)));
     value = register_module("value", torch::nn::Linear(torch::nn::LinearOptions(d_model, d_model)));
+    proj = register_module("proj", torch::nn::Linear(torch::nn::LinearOptions(d_model, d_model)));
     layer_norm = register_module("layer_norm", torch::nn::LayerNorm(torch::nn::LayerNormOptions({d_model}).eps(1e-6)));
 }
 
@@ -128,6 +130,7 @@ torch::Tensor HydraAttentionImpl::forward(torch::Tensor x)
     k = torch::softmax(k.t(), 1).t();
     torch::Tensor kv = (k * v).sum(-2, true);
     x = q * kv;
+    x = proj(x);
     x += residual;
     x = layer_norm(x);
     return x;
@@ -186,7 +189,7 @@ ORBrefinerImpl::ORBrefinerImpl()
 {
     kenc = KeypointEncoder();
     denc = DescriptorEncoder();
-    attn_proj = AttentionalNN(256, 9);
+    attn_proj = AttentionalNN(256, 4);
     final_proj = torch::nn::Linear(torch::nn::LinearOptions(256, 256));
     layer_norm = torch::nn::LayerNorm(torch::nn::LayerNormOptions({256}).eps(1e-6));
 

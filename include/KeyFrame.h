@@ -85,7 +85,7 @@ class KeyFrame
         ar & const_cast<std::vector<cv::KeyPoint> &>(mvKeysUn);
         ar & const_cast<std::vector<float> &>(mvuRight);
         ar & const_cast<std::vector<float> &>(mvDepth);
-        ar & const_cast<cv::Mat &>(mDescriptors);
+        ar & mDescriptors;
         // BoW vars
         ar & mBowVec & mFeatVec;
         // Pose relative to parent vars
@@ -254,7 +254,7 @@ public:
     const std::vector<cv::KeyPoint> mvKeysUn;
     const std::vector<float> mvuRight; // negative value for monocular points
     const std::vector<float> mvDepth; // negative value for monocular points
-    const cv::Mat mDescriptors;
+    cv::Mat mDescriptors;
 
     //BoW
     DBoW2::BowVector mBowVec;

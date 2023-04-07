@@ -481,6 +481,10 @@ void LocalMapping::SearchInNeighbors()
 
     // Search matches by projection from current KF in target KFs
     ORBmatcher matcher;
+    // if (!mpTracker->mbRefineORB)
+        matcher = ORBmatcher(0.6,true);
+    // else
+    //     matcher = ORBmatcher(0.5,false);
     vector<MapPoint*> vpMapPointMatches = mpCurrentKeyFrame->GetMapPointMatches();
     for(vector<KeyFrame*>::iterator vit=vpTargetKFs.begin(), vend=vpTargetKFs.end(); vit!=vend; vit++)
     {

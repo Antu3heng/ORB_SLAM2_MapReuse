@@ -68,6 +68,7 @@ private:
     torch::nn::Linear query{nullptr};
     torch::nn::Linear key{nullptr};
     torch::nn::Linear value{nullptr};
+    torch::nn::Linear proj{nullptr};
     torch::nn::LayerNorm layer_norm{nullptr};
 };
 TORCH_MODULE(HydraAttention);

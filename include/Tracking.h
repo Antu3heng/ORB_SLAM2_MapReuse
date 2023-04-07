@@ -119,6 +119,9 @@ public:
 
     bool mbRefineORB;
 
+    int count;
+    int total_num_features;
+
 protected:
 
     // Main tracking function. It is independent of the input sensor.

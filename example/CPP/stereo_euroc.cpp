@@ -36,9 +36,9 @@ void LoadImages(const string &strPathLeft, const string &strPathRight, const str
 
 int main(int argc, char **argv)
 {
-    if(argc != 5)
+    if(argc != 6)
     {
-        cerr << endl << "Usage: ./stereo_euroc path_to_config path_to_left_folder path_to_right_folder path_to_times_file" << endl;
+        cerr << endl << "Usage: ./stereo_euroc path_to_config path_to_left_folder path_to_right_folder path_to_times_file path_to_image_folder" << endl;
         return 1;
     }
 
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     cameraType = ORB_SLAM2_MapReuse::System::STEREO;
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2_MapReuse::System SLAM(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, true);;
+    ORB_SLAM2_MapReuse::System SLAM(argv[1], cameraType, ORB_SLAM2_MapReuse::System::SLAM, false);;
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -177,11 +177,15 @@ int main(int argc, char **argv)
     cout << "median tracking time: " << vTimesTrack[nImages/2] << endl;
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
+    string save_path, kf_save_path;
+    save_path = string(argv[5]) + "_FrameTrajectory.tum";
+    kf_save_path = string(argv[5]) + "_KeyFrameTrajectory.tum";
     // Save camera trajectory
-    SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
+    SLAM.SaveTrajectoryTUM(save_path);
+    SLAM.SaveKeyFrameTrajectoryTUM(kf_save_path);   
 
     // SLAM.SaveMap("map.bin");
-    SLAM.SaveMapUsingBoost("map.bin");
+    // SLAM.SaveMapUsingBoost("map.bin");
 
     return 0;
 }

@@ -19,8 +19,9 @@ using namespace std;
 namespace ORB_SLAM2_MapReuse
 {
 
-    Locator::Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile)
-            : mpVocabulary(pVoc), mpKeyFrameDatabase(pKFDB)
+    Locator::Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile, 
+                    bool bAblation=false, bool bMatchingUsingBooster=false, bool bRetrievalUsingBooster=false, ORBVocabulary *pVocAB=nullptr)
+            : mpVocabulary(pVoc), mpKeyFrameDatabase(pKFDB), mbAblation(bAblation), mbMatchingUsingBooster(bMatchingUsingBooster), mbRetrievalUsingBooster(bRetrievalUsingBooster), mpVocabularyForBoostingAblation(pVocAB)
     {
         cv::FileStorage fsSettings(strSettingsFile, cv::FileStorage::READ);
         float fx = fsSettings["Camera.fx"];
@@ -123,6 +124,8 @@ namespace ORB_SLAM2_MapReuse
                 cvtColor(ImGray, ImGray, CV_BGRA2GRAY);
         }
         mCurrentFrame = Frame(ImGray, timestamp, mpORBextractor, mpVocabulary, mK, mDistCoef, mbf, 0.0f, mORBrefiner, mbRefineORB);
+        current_image_height = ImGray.rows;
+        current_image_width = ImGray.cols;
 
         if (VisualLocalization())
         {
@@ -140,9 +143,51 @@ namespace ORB_SLAM2_MapReuse
         return mCurrentFrame.mTcw.clone();
     }
 
+    void Locator::computeForCurrentFrame()
+    {
+        if (mbAblation)
+        {
+            if (mbMatchingUsingBooster && !mbRetrievalUsingBooster)
+            {
+                // compute the BowVec before Boosting
+                mCurrentFrame.ComputeBoW();
+                // Boosting the ORB
+                mORBrefiner->refine(current_image_height, current_image_width, mCurrentFrame.mvKeys, mCurrentFrame.mDescriptors);
+                // Update the FeatVec for matching using voc for ORB+Boost-B
+                vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mCurrentFrame.mDescriptors);
+                DBoW2::BowVector fakeBowVec;
+                mpVocabularyForBoostingAblation->transform(vCurrentDesc,fakeBowVec,mCurrentFrame.mFeatVec,4);
+            }
+            else if (!mbMatchingUsingBooster && mbRetrievalUsingBooster)
+            {
+                // compute the Featvec before Boosting
+                mCurrentFrame.ComputeBoW();
+                // Creat a container for ORB+Boost-B
+                cv::Mat Descriptors = mCurrentFrame.mDescriptors;
+                // Boosting the ORB using the container
+                mORBrefiner->refine(current_image_height, current_image_width, mCurrentFrame.mvKeys, Descriptors);
+                // Update the BowVec for retrieval using voc for ORB+Boost-B
+                vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Descriptors);
+                DBoW2::FeatureVector fakeFeatVec;
+                mpVocabularyForBoostingAblation->transform(vCurrentDesc,mCurrentFrame.mBowVec,fakeFeatVec,4);
+            }
+            else if (mbMatchingUsingBooster && mbRetrievalUsingBooster)
+            {
+                // Boosting the ORB
+                mORBrefiner->refine(current_image_height, current_image_width, mCurrentFrame.mvKeys, mCurrentFrame.mDescriptors);
+                // compute the Bow
+                vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mCurrentFrame.mDescriptors);
+                mpVocabularyForBoostingAblation->transform(vCurrentDesc,mCurrentFrame.mBowVec,mCurrentFrame.mFeatVec,4);
+            }
+        }
+        else
+            mCurrentFrame.ComputeBoW();
+    }
+
     bool Locator::VisualLocalization()
     {
-        mCurrentFrame.ComputeBoW();
+        // mCurrentFrame.ComputeBoW();
+        computeForCurrentFrame();
         vector<KeyFrame *> vpCandidateKFs = mpKeyFrameDatabase->DetectRelocalizationCandidates(&mCurrentFrame);
 
         vector<double> CandidateKFTimes;
@@ -162,7 +207,7 @@ namespace ORB_SLAM2_MapReuse
         // if (!mbRefineORB)
             matcher = ORBmatcher(0.75, true);
         // else
-        //     matcher = ORBmatcher(0.75, false);
+        //     matcher = ORBmatcher(0.7, false);
 
         vector<PnPsolver *> vpPnPsolvers;
         vpPnPsolvers.resize(nKFs);
@@ -202,7 +247,7 @@ namespace ORB_SLAM2_MapReuse
         // if (!mbRefineORB)
             matcher2 = ORBmatcher(0.9, true);
         // else
-        //     matcher2 = ORBmatcher(0.9, false);
+        //     matcher2 = ORBmatcher(0.8, false);
 
         while (nCandidates > 0 && !bMatch)
         {

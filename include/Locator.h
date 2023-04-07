@@ -31,11 +31,16 @@ namespace ORB_SLAM2_MapReuse
 
     public:
 
-        Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile);
+        Locator(ORBVocabulary *pVoc, KeyFrameDatabase *pKFDB, const string &strSettingsFile, 
+                bool bAblation, bool bMatchingUsingBooster, bool bRetrievalUsingBooster, ORBVocabulary *pVocAB);
 
         cv::Mat visualLocalization(const cv::Mat &im, const double &timestamp);
 
+        void computeForCurrentFrame();
+
         float CalculateRecall();
+
+        ORBrefiner mORBrefiner;
 
         list<cv::Mat> mlFramePoses;
         list<double> mlFrameTimes;
@@ -48,16 +53,22 @@ namespace ORB_SLAM2_MapReuse
         bool VisualLocalization();
 
         ORBVocabulary *mpVocabulary;
+        ORBVocabulary *mpVocabularyForBoostingAblation;
         KeyFrameDatabase *mpKeyFrameDatabase;
         ORBextractor *mpORBextractor;
-        ORBrefiner mORBrefiner;
         cv::Mat mK;
         cv::Mat mDistCoef;
         float mbf;
         bool mbRGB;
         bool mbRefineORB;
 
+        int current_image_height;
+        int current_image_width;
+
         Frame mCurrentFrame;
+
+        // Ablation
+        bool mbAblation, mbMatchingUsingBooster, mbRetrievalUsingBooster;
     };
 
 }

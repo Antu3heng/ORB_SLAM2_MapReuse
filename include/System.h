@@ -143,6 +143,8 @@ namespace ORB_SLAM2_MapReuse
         // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
         void SaveTrajectoryKITTI(const string &filename);
 
+        void SaveKeyFrameTrajectoryKITTI(const string &filename);
+
         void SaveRelocCandidateKF(const string &filename);
 
         void SaveRelocKF(const string &filename);
@@ -164,6 +166,8 @@ namespace ORB_SLAM2_MapReuse
 
         std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
+        void print_features_nums();
+
     private:
 
         // Input sensor
@@ -174,6 +178,7 @@ namespace ORB_SLAM2_MapReuse
 
         // ORB vocabulary used for place recognition and feature matching.
         ORBVocabulary *mpVocabulary;
+        ORBVocabulary *mpVocabularyForBoostingAblation;
 
         // KeyFrame database for place recognition (relocalization and loop detection).
         KeyFrameDatabase *mpKeyFrameDatabase;
@@ -222,6 +227,12 @@ namespace ORB_SLAM2_MapReuse
         std::vector<MapPoint *> mTrackedMapPoints;
         std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
         std::mutex mMutexState;
+
+        int image_height;
+        int image_width;
+
+        // Ablation
+        bool bAblation = false, bMatchingUsingBooster = false, bRetrievalUsingBooster = false;
     };
 
 }// namespace ORB_SLAM

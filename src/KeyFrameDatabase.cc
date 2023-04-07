@@ -309,29 +309,12 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     set<KeyFrame*> spAlreadyAddedKF;
     vector<KeyFrame*> vpRelocCandidates;
     // vpRelocCandidates.reserve(lAccScoreAndMatch.size());
-    vpRelocCandidates.reserve(20);
-    lAccScoreAndMatch.sort([] (pair<float,KeyFrame*> x, pair<float,KeyFrame*> y) {return x.first > y.first;});
-
-    for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
-    {
-        if(vpRelocCandidates.size() < 20)
-        {
-            KeyFrame* pKFi = it->second;
-            if(!spAlreadyAddedKF.count(pKFi))
-            {
-                vpRelocCandidates.push_back(pKFi);
-                spAlreadyAddedKF.insert(pKFi);
-            }
-        } else
-        {
-            break;
-        }
-    }
+    // vpRelocCandidates.reserve(20);
+    // lAccScoreAndMatch.sort([] (pair<float,KeyFrame*> x, pair<float,KeyFrame*> y) {return x.first > y.first;});
 
     // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
     // {
-    //     const float &si = it->first;
-    //     if(si>minScoreToRetain)
+    //     if(vpRelocCandidates.size() < 20)
     //     {
     //         KeyFrame* pKFi = it->second;
     //         if(!spAlreadyAddedKF.count(pKFi))
@@ -339,8 +322,25 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     //             vpRelocCandidates.push_back(pKFi);
     //             spAlreadyAddedKF.insert(pKFi);
     //         }
+    //     } else
+    //     {
+    //         break;
     //     }
     // }
+
+    for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    {
+        const float &si = it->first;
+        if(si>minScoreToRetain)
+        {
+            KeyFrame* pKFi = it->second;
+            if(!spAlreadyAddedKF.count(pKFi))
+            {
+                vpRelocCandidates.push_back(pKFi);
+                spAlreadyAddedKF.insert(pKFi);
+            }
+        }
+    }
 
     return vpRelocCandidates;
 }

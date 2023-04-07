@@ -57,15 +57,18 @@ namespace ORB_SLAM2_MapReuse
         }
         cout << "Vocabulary loaded!" << endl << endl;
 
-        //Create KeyFrame Database
-        mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
-
         //Create the Map
         mpMap = new Map();
+
+        image_height = fsSettings["Camera.height"];
+        image_width = fsSettings["Camera.width"];
 
         //Create the main process thread(tracker or locator)
         if (mMode != VisualLocalization)
         {
+            //Create KeyFrame Database
+            mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
+
             cout << "Input sensor was set to: ";
 
             if (mSensor == MONOCULAR)
@@ -118,8 +121,43 @@ namespace ORB_SLAM2_MapReuse
             mpLoopCloser->SetLocalMapper(mpLocalMapper);
         } else
         {
+            int nAblation = fsSettings["Localization.AblationTest"];
+            bAblation = nAblation;
+            if (bAblation)
+                cout << "Running ablation study!!!" << endl;
+            int nMatchingUsingBooster = fsSettings["Localization.MatchingUsingBooster"];
+            bMatchingUsingBooster = nMatchingUsingBooster;
+            if (bMatchingUsingBooster)
+                cout << "Feature Matching using ORB+Boost-B!!!" << endl;
+            int nRetrievalUsingBooster = fsSettings["Localization.RetrievalUsingBooster"];
+            bRetrievalUsingBooster = nRetrievalUsingBooster;
+            if (bRetrievalUsingBooster)
+                cout << "Image Retrieval using ORB+Boost-B!!!" << endl;
+
+            string strVocFileForBooster;
+            fsSettings["Localization.BoosterVocPath"] >> strVocFileForBooster;
+
+            //Load ORB Vocabulary
+            cout << endl << "Loading ORB Vocabulary for ORB+Boost-B. This could take a while..." << endl;
+
+            mpVocabularyForBoostingAblation = new ORBVocabulary();
+            bool bLoad = mpVocabularyForBoostingAblation->loadFromTextFile(strVocFileForBooster);
+            if (!bLoad)
+            {
+                cerr << "Wrong path to vocabulary. " << endl;
+                cerr << "Failed to open at: " << strVocFileForBooster << endl;
+                exit(-1);
+            }
+            cout << "Vocabulary for ORB+Boost-B loaded!" << endl << endl;
+
+            //Create KeyFrame Database
+            if (bRetrievalUsingBooster)
+                mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabularyForBoostingAblation);
+            else
+                mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
+
             cout << endl << "Visual Localization with ORB-SLAM2 map...." << endl;
-            mpLocator = new Locator(mpVocabulary, mpKeyFrameDatabase, strSettingsFile);
+            mpLocator = new Locator(mpVocabulary, mpKeyFrameDatabase, strSettingsFile, bAblation, bMatchingUsingBooster, bRetrievalUsingBooster, mpVocabularyForBoostingAblation);
         }
 
     }
@@ -548,6 +586,53 @@ namespace ORB_SLAM2_MapReuse
         cout << endl << "KITTI format trajectory saved!" << endl;
     }
 
+    void System::SaveKeyFrameTrajectoryKITTI(const string &filename)
+    {
+         if (mMode != SLAM)
+        {
+            cout << endl << "Saving keyframe pose to " << filename << " ..." << endl;
+        }
+        else
+            cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
+
+        vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
+        sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
+
+        // Transform all keyframes so that the first keyframe is at the origin.
+        // After a loop closure the first keyframe might not be at the origin.
+        cv::Mat Two = vpKFs[0]->GetPoseInverse();
+
+        ofstream f;
+        f.open(filename.c_str());
+        f << fixed;
+
+        for (size_t i = 0; i < vpKFs.size(); i++)
+        {
+            KeyFrame *pKF = vpKFs[i];
+
+            pKF->SetPose(pKF->GetPose()*Two);
+
+            if (pKF->isBad())
+                continue;
+
+            cv::Mat R = pKF->GetRotation().t();
+            vector<float> q = Converter::toQuaternion(R);
+            cv::Mat t = pKF->GetCameraCenter();
+            f << setprecision(9) << R.at<float>(0, 0) << " " << R.at<float>(0, 1) << " " << R.at<float>(0, 2)
+                  << " " << t.at<float>(0) << " " <<
+                  R.at<float>(1, 0) << " " << R.at<float>(1, 1) << " " << R.at<float>(1, 2) << " "
+                  << t.at<float>(1)
+                  << " " <<
+                  R.at<float>(2, 0) << " " << R.at<float>(2, 1) << " " << R.at<float>(2, 2) << " "
+                  << t.at<float>(2)
+                  << endl;
+
+        }
+
+        f.close();
+        cout << endl << "KITTI format keyframe trajectory saved!" << endl;
+    }
+
     void System::SaveRelocCandidateKF(const string &filename)
     {
         cout << endl << "Saving relocalization correspondence to " << filename << " ..." << endl;
@@ -630,25 +715,77 @@ namespace ORB_SLAM2_MapReuse
         if (!mpMap->LoadMap(filename))
             return false;
 
-        // std::vector<MapPoint*> vpMapPoints = mpMap->GetAllMapPoints();
-        // for(auto &mp:vpMapPoints)
-        //     if(mp)
-        //     {
-        //         mp->ComputeDistinctiveDescriptors();
-        //         // TODO: need to recover the ScaleFactors of keyframe
-        //         // mp->UpdateNormalAndDepth();
-        //     }
-        std::vector<KeyFrame *> vpKeyFrames = mpMap->GetAllKeyFrames();
-        for (auto &kf: vpKeyFrames)
+        if (bAblation)
         {
-            kf->SetKeyFrameDatabase(mpKeyFrameDatabase);
-            kf->SetORBVocabulary(mpVocabulary);
-            // kf->ComputeBoW();
-            // kf->UpdateConnections();
-            mpKeyFrameDatabase->add(kf);
+            std::vector<KeyFrame *> vpKeyFrames = mpMap->GetAllKeyFrames();
+            for (auto &kf: vpKeyFrames)
+            {
+                kf->SetKeyFrameDatabase(mpKeyFrameDatabase);
+                kf->SetORBVocabulary(mpVocabulary);
+                if (bMatchingUsingBooster && !bRetrievalUsingBooster)
+                {
+                    kf->mFeatVec.clear();
+                    // Boosting the ORB
+                    mpLocator->mORBrefiner->refine(image_height, image_width, kf->mvKeys, kf->mDescriptors);
+                    // Update the FeatVec for matching using voc for ORB+Boost-B
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(kf->mDescriptors);
+                    DBoW2::BowVector fakeBowVec;
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,fakeBowVec,kf->mFeatVec,4);
+                }
+                else if (!bMatchingUsingBooster && bRetrievalUsingBooster)
+                {
+                    kf->mBowVec.clear();
+                    // Creat a container for ORB+Boost-B
+                    cv::Mat Descriptors = kf->mDescriptors;
+                    // Boosting the ORB using the container
+                    mpLocator->mORBrefiner->refine(image_height, image_width, kf->mvKeys, Descriptors);
+                    // Update the BowVec for retrieval using voc for ORB+Boost-B
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Descriptors);
+                    DBoW2::FeatureVector fakeFeatVec;
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,kf->mBowVec,fakeFeatVec,4);
+                }
+                else if (bMatchingUsingBooster && bRetrievalUsingBooster)
+                {
+                    kf->mFeatVec.clear();
+                    kf->mBowVec.clear();
+                    // Boosting the ORB
+                    mpLocator->mORBrefiner->refine(image_height, image_width, kf->mvKeys, kf->mDescriptors);
+                    // compute the Bow
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(kf->mDescriptors);
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,kf->mBowVec,kf->mFeatVec,4);
+                }
+                mpKeyFrameDatabase->add(kf);
+            }
+            std::vector<MapPoint*> vpMapPoints = mpMap->GetAllMapPoints();
+            for(auto &mp:vpMapPoints)
+                if(mp)
+                    mp->ComputeDistinctiveDescriptors();
+
+            cout << endl << "Map has been loaded and converted successfully!" << endl;
+            return true;
         }
-        cout << endl << "Map has been loaded successfully!" << endl;
-        return true;
+        else
+        {
+            // std::vector<MapPoint*> vpMapPoints = mpMap->GetAllMapPoints();
+            // for(auto &mp:vpMapPoints)
+            //     if(mp)
+            //     {
+            //         mp->ComputeDistinctiveDescriptors();
+            //         // TODO: need to recover the ScaleFactors of keyframe
+            //         // mp->UpdateNormalAndDepth();
+            //     }
+            std::vector<KeyFrame *> vpKeyFrames = mpMap->GetAllKeyFrames();
+            for (auto &kf: vpKeyFrames)
+            {
+                kf->SetKeyFrameDatabase(mpKeyFrameDatabase);
+                kf->SetORBVocabulary(mpVocabulary);
+                // kf->ComputeBoW();
+                // kf->UpdateConnections();
+                mpKeyFrameDatabase->add(kf);
+            }
+            cout << endl << "Map has been loaded successfully!" << endl;
+            return true;
+        }
     }
 
     bool System::SaveMapUsingBoost(const std::string &filename)
@@ -687,12 +824,52 @@ namespace ORB_SLAM2_MapReuse
             vpKeyFrame->SetMap(mpMap);
             mpKeyFrameDatabase->add(vpKeyFrame);
             vpKeyFrame->UpdateConnections();
+
+            if (bAblation)
+            {
+                vpKeyFrame->SetKeyFrameDatabase(mpKeyFrameDatabase);
+                vpKeyFrame->SetORBVocabulary(mpVocabulary);
+                if (bMatchingUsingBooster && !bRetrievalUsingBooster)
+                {
+                    vpKeyFrame->mFeatVec.clear();
+                    // Boosting the ORB
+                    mpLocator->mORBrefiner->refine(image_height, image_width, vpKeyFrame->mvKeys, vpKeyFrame->mDescriptors);
+                    // Update the FeatVec for matching using voc for ORB+Boost-B
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(vpKeyFrame->mDescriptors);
+                    DBoW2::BowVector fakeBowVec;
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,fakeBowVec,vpKeyFrame->mFeatVec,4);
+                }
+                else if (!bMatchingUsingBooster && bRetrievalUsingBooster)
+                {
+                    vpKeyFrame->mBowVec.clear();
+                    // Creat a container for ORB+Boost-B
+                    cv::Mat Descriptors = vpKeyFrame->mDescriptors;
+                    // Boosting the ORB using the container
+                    mpLocator->mORBrefiner->refine(image_height, image_width, vpKeyFrame->mvKeys, Descriptors);
+                    // Update the BowVec for retrieval using voc for ORB+Boost-B
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Descriptors);
+                    DBoW2::FeatureVector fakeFeatVec;
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,vpKeyFrame->mBowVec,fakeFeatVec,4);
+                }
+                else if (bMatchingUsingBooster && bRetrievalUsingBooster)
+                {
+                    vpKeyFrame->mFeatVec.clear();
+                    vpKeyFrame->mBowVec.clear();
+                    // Boosting the ORB
+                    mpLocator->mORBrefiner->refine(image_height, image_width, vpKeyFrame->mvKeys, vpKeyFrame->mDescriptors);
+                    // compute the Bow
+                    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(vpKeyFrame->mDescriptors);
+                    mpVocabularyForBoostingAblation->transform(vCurrentDesc,vpKeyFrame->mBowVec,vpKeyFrame->mFeatVec,4);
+                }
+            }
         }
 
         std::vector<MapPoint *> vpMapPoints = mpMap->GetAllMapPoints();
         for (auto &vpMapPoint: vpMapPoints)
         {
             vpMapPoint->SetMap(mpMap);
+            if (bAblation)
+                vpMapPoint->ComputeDistinctiveDescriptors();
         }
 
         if (mMode != VisualLocalization)
@@ -709,6 +886,11 @@ namespace ORB_SLAM2_MapReuse
 
         cout << endl << "Map loaded successfully." << endl;
         return true;
+    }
+
+    void System::print_features_nums()
+    {
+        cout << endl << "avg feat num: " << (float)mpTracker->total_num_features / (float)mpTracker->count << endl;
     }
 
 } //namespace ORB_SLAM

@@ -247,24 +247,20 @@ void Frame::ExtractORB(int flag, const cv::Mat &im)
     if(flag==0)
     {
         (*mpORBextractorLeft)(im,cv::Mat(),mvKeys,mDescriptors);
+        cv::Mat descs = cv::Mat::zeros(mDescriptors.rows, 32, CV_8UC1);
         if (mbRefineORB)
             mORBrefiner->refine(im.rows, im.cols, mvKeys, mDescriptors);
         else
-        {
-            cv::Mat descs = cv::Mat::zeros(mDescriptors.rows, 32, CV_8UC1);
             mORBrefiner->refine(im.rows, im.cols, mvKeys, descs);
-        }
     }
     else
     {
         (*mpORBextractorRight)(im,cv::Mat(),mvKeysRight,mDescriptorsRight);
+        cv::Mat descs = cv::Mat::zeros(mDescriptorsRight.rows, 32, CV_8UC1);
         if (mbRefineORB)
             mORBrefiner->refine(im.rows, im.cols, mvKeysRight, mDescriptorsRight);
         else
-        {
-            cv::Mat descs = cv::Mat::zeros(mDescriptorsRight.rows, 32, CV_8UC1);
             mORBrefiner->refine(im.rows, im.cols, mvKeysRight, descs);
-        }
     }
 }
 
@@ -410,11 +406,9 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY)
 
 void Frame::ComputeBoW()
 {
-    if(mBowVec.empty())
-    {
-        vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
-        mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
-    }
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
+    mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
+    // mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,0);
 }
 
 void Frame::UndistortKeyPoints()
